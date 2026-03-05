@@ -1,5 +1,6 @@
 import demucs
-
+import librosa
+import pathlib
 #uses demucs for now, will create a custom model later on
 class vocalRemovalModelHandler:
     def __init__(self):
@@ -13,7 +14,11 @@ class vocalRemovalModelHandler:
         return stems["vocals"]
     
 def main():
-    print("Hello, World!")
+    removalHandler = vocalRemovalModelHandler()
+    file = pathlib.Path("Hypatia.mp3")
+    mix = librosa.load(file, sr=None)
+    instrumental = removalHandler.remove_vocals(mix)
+    librosa.output.write_wav("Hypatia_instrumental.wav", instrumental, sr=None)
 
 if __name__ == "__main__":
     main()
