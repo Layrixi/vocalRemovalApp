@@ -15,7 +15,7 @@ class vocalRemovalModelHandler:
         self.model.eval()
         
     def remove_vocals(self, audio_file):
-        """Return instrumental using hdemucs_ft model."""
+        """Return instrumental using htdemucs_ft model."""
         #it should get the audio from the main, to fix later
         audio, _ = librosa.load(audio_file, sr=self.model.samplerate, mono=False)
 
@@ -47,9 +47,9 @@ def main():
     print(f"Using device: {device}")
     removalHandler = vocalRemovalModelHandler(device=device)
     #it should check here if the file exists and is a valid audio file, but for now it just assumes it is. to fix later
-    file = pathlib.Path("Hypatia.mp3")
+    file = pathlib.Path("plik.wav")
     instrumental = removalHandler.remove_vocals(file)
-    sf.write("Hypatia_instrumental.wav", instrumental.T, removalHandler.model.samplerate)
+    sf.write("Hypatia_instrumental_hdemucs.wav", instrumental.T, removalHandler.model.samplerate)
 
 if __name__ == "__main__":
     main()
