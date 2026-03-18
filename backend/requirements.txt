@@ -1,6 +1,4 @@
 flask==2.3.3
-#remove flask-livereload in production
-flask-livereload
 librosa==0.10.0
 numpy==1.24.3
 scipy==1.11.2
