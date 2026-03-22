@@ -5,6 +5,12 @@ import pathlib
 import torch
 import soundfile as sf
 
+#add the parent directory to the path, may need to be changed later
+import sys
+import pathlib
+sys.path.append(str(pathlib.Path(__file__).parent.parent))
+from config import check_device, get_audio_path
+
 #uses demucs for now, will create a custom model later on
 class vocalRemovalModelHandler:
     def __init__(self,device = "cpu", segment = 8.0):
@@ -43,11 +49,11 @@ class vocalRemovalModelHandler:
         return instrumental.cpu().numpy()
     
 def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = check_device()
     print(f"Using device: {device}")
     removalHandler = vocalRemovalModelHandler(device=device)
     #it should check here if the file exists and is a valid audio file, but for now it just assumes it is. to fix later
-    file = pathlib.Path("plik.wav")
+    file = get_audio_path("plik.wav")
     instrumental = removalHandler.remove_vocals(file)
     sf.write("Hypatia_instrumental_hdemucs.wav", instrumental.T, removalHandler.model.samplerate)
 
