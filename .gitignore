@@ -26,9 +26,7 @@ pip-wheel-metadata/
 .coverage
 .coverage.*
 htmlcov/
-./backend/uploads/audio/*
-./backend/uploads/video/*
-./backend/uploads/output/*
+
 
 # IDE/editor
 .vscode/
@@ -43,7 +41,9 @@ Thumbs.db
 .env.*
 *.local
 
-# audio files
+# audio files and uploads
 *.mp3
 *.wav
-Hypatia_instrumental.wav
+backend/uploads/audio/*
+backend/uploads/video/*
+backend/uploads/output/*

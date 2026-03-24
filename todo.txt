@@ -1,6 +1,7 @@
 actual todo:
 - make user able to use generated audio with removed vocals
 - make it possible to render the final video
+- make it possible to scale the time bar
 
 bugs: 
 - uploads stay in the "cache".
