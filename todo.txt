@@ -1,0 +1,9 @@
+bugs: 
+- when app crashes or leaves without doing anything to the video, video stays in the uploads folder. to fix later on
+
+tests:
+- check if something happens when a "big" sized file is uploaded
+
+after everything's ready:
+- set debug=false
+- adapt port to the available choices
