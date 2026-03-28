@@ -568,17 +568,6 @@
 
  #videoFileInput, #lyricsFileInput { display: none; }
 
- .sync-flash {
-   position: fixed;
-   top: 20px;
-   right: 20px;
-   width: 10px;
-   height: 10px;
-   background: var(--red);
-   border-radius: 50%;
-   animation: pulse 0.6s ease-in-out infinite alternate;
-   display: none;
- }
 
  @keyframes pulse {
    from { opacity: 1; transform: scale(1); }
