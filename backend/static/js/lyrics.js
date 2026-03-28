@@ -115,15 +115,21 @@ function updateInstructions() {
 
 function assignTimestamp(idx, time) {
   state.lines[idx].timestamp = parseFloat(time.toFixed(3));
-
-  // Auto-advance to next unsynced line
+  //to optimize whe loop and maybe smarter ifs
+  // Auto-advance to next unsynced line (forward first, then wrap)
   let next = idx + 1;
   while (next < state.lines.length && state.lines[next].timestamp !== null) next++;
   if (next < state.lines.length) {
     state.activeLineIdx = next;
   } else {
-    state.activeLineIdx = null;
-    showPopUp('All lines synced! 🎉');
+    const firstUnsynced = state.lines.findIndex(l => l.timestamp === null);
+    if (firstUnsynced === -1) {
+      state.activeLineIdx = null;
+      showPopUp('All lines synced! 🎉');
+    } else {
+      // Wrap around to first unsynced line earlier in the list
+      state.activeLineIdx = firstUnsynced;
+    }
   }
 
   renderLyricsList();
