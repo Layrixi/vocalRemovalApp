@@ -230,6 +230,15 @@
    border-color: var(--synced-border);
  }
 
+ .lyric-line.line-flash {
+   animation: lineFlash 0.6s ease-out forwards;
+ }
+
+ @keyframes lineFlash {
+   0%   { background: rgba(245,166,35,0.5); border-color: var(--amber); }
+   100% { background: var(--synced); border-color: var(--synced-border); }
+ }
+
  .lyric-line.synced:hover { border-color: var(--green); }
 
  .line-index {

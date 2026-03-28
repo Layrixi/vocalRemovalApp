@@ -98,12 +98,15 @@ function selectLine(idx) {
   updateInstructions();
 }
 
+// shows instructions above the timeline, changes based on whether a line is active or not.
 function updateInstructions() {
+    //line selected, display instructions and pill block with the text
   if (state.activeLineIdx !== null && state.lines[state.activeLineIdx]) {
     const line = state.lines[state.activeLineIdx];
     instructionText.textContent = 'Click anywhere on the timeline to set timestamp for:';
     activePill.textContent = `"${line.text}"`;
     activePill.style.display = 'block';
+    //line not selected, display generic instructions and hide pill block
   } else {
     instructionText.textContent = 'Select a lyric line on the left, then click the timeline to assign its start time.';
     activePill.style.display = 'none';
@@ -112,9 +115,6 @@ function updateInstructions() {
 
 function assignTimestamp(idx, time) {
   state.lines[idx].timestamp = parseFloat(time.toFixed(3));
-  // Flash effect
-  syncFlash.style.display = 'block';
-  setTimeout(() => syncFlash.style.display = 'none', 600);
 
   // Auto-advance to next unsynced line
   let next = idx + 1;
@@ -129,6 +129,13 @@ function assignTimestamp(idx, time) {
   renderLyricsList();
   renderMarkers();
   updateStats();
+
+  // Flash the line that was just synced
+  const el = lyricsList.children[idx];
+  if (el) {
+    el.classList.add('line-flash');
+    setTimeout(() => el.classList.remove('line-flash'), 600);
+  }
 }
 
 // ── STATS ──
