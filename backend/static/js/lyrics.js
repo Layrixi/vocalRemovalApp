@@ -23,6 +23,8 @@ document.getElementById('clearLyricsBtn').addEventListener('click', () => {
   renderMarkers();
 });
 
+// skip LRC and SRT handling for now, todo lated
+// splits the text by newlines, deletes LRC and SRT metadata.
 function parseAndRenderLyrics() {
   const raw = lyricsRaw.value.trim();
   if (!raw) return;
@@ -49,6 +51,7 @@ function parseAndRenderLyrics() {
   showPopUp(`Parsed ${state.lines.length} lines`);
 }
 
+//could be handled by backend, but works for now.
 function renderLyricsList() {
   lyricsList.innerHTML = '';
   state.lines.forEach((line, i) => {
