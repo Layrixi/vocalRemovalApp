@@ -1,4 +1,4 @@
-// ── STATE ──
+//  STATE 
 const state = {
   lines: [],         // { text, timestamp: null|seconds }
   activeLineIdx: null,
@@ -8,7 +8,7 @@ const state = {
   speedIdx: 3,
 };
 
-// ── ELEMENTS ──
+//  ELEMENTS 
 const video            = document.getElementById('mainVideo');
 const playBtn          = document.getElementById('playBtn');
 const timeDisplay      = document.getElementById('timeDisplay');

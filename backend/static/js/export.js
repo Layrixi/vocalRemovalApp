@@ -1,4 +1,4 @@
-// ── EXPORT ──
+//  EXPORT 
 
 document.getElementById('exportBtn').addEventListener('click', exportLRC);
 document.getElementById('exportSrtBtn').addEventListener('click', exportSRT);

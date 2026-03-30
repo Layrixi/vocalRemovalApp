@@ -1,4 +1,4 @@
-// ── UTILS ──
+//  UTILS 
 
 function formatTime(s) {
   if (!s || isNaN(s)) return '0:00';

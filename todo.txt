@@ -9,13 +9,15 @@ actual todo:
 - add feature to unselect line when mouse click anywhere else than the timeline
 - make timestamped lines more readable. For example when the mouse hover's over the timestamp, it then shows the text instead of simply showing it right now coz it can make a mess with fast changing texts.
 - make it possible to edit the text on the text list after it's been parsed
+- make it possible to switch between instrumental and vocal version of audio
 bugs: 
 - uploads stay in the "cache".
 - !may not be a problem; If video gets deleted, it stays in the cache but it may generate problems with rendering later on.\
     Generates problem with vocal removal - file not found. Add a fix that gets the video again from the cache.
+
 tests:
 - check if something happens when a "big" sized file is uploaded
-
+- actuially test the srt and lrc formats
 after everything's ready:
 - set debug=false
 - adapt port to the available choices

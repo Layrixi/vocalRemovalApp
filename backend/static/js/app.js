@@ -1,4 +1,4 @@
-// ── KEYBOARD SHORTCUTS ──
+//  KEYBOARD SHORTCUTS 
 document.addEventListener('keydown', e => {
   // Space = play/pause
   if (e.code === 'Space' && document.activeElement !== lyricsRaw) {
@@ -32,6 +32,6 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ── INIT ──
+//  INIT 
 updateInstructions();
 

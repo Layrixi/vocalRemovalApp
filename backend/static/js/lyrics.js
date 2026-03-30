@@ -1,4 +1,4 @@
-// ── LYRICS LOADING ──
+//  LYRICS LOADING 
 
 document.getElementById('lyricsUploadZone').addEventListener('click', () =>
   document.getElementById('lyricsFileInput').click());
@@ -146,7 +146,7 @@ function assignTimestamp(idx, time) {
   }
 }
 
-// ── STATS ──
+//  STATS 
 //simple sync and unsynced count
 function updateStats() {
   const synced = state.lines.filter(l => l.timestamp !== null).length;

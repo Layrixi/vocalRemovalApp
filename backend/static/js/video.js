@@ -1,4 +1,4 @@
-// ── VIDEO LOADING ──
+//  VIDEO LOADING 
 
 videoDropZone.addEventListener('click', () => document.getElementById('videoFileInput').click());
 document.getElementById('videoFileInput').addEventListener('change', e => {
@@ -39,7 +39,7 @@ function loadVideo(file) {
     .catch(() => showPopUp('Server upload failed'));
 }
 
-// ── TIMELINE INTERACTION ──
+//  TIMELINE INTERACTION 
 let isDragging = false;
 
 timelineWrap.addEventListener('mousemove', e => {
@@ -95,7 +95,7 @@ function seekTo(t) {
   updateTimeDisplay();
 }
 
-// ── PLAYBACK ──
+//  PLAYBACK 
 playBtn.addEventListener('click', () => {
   if (video.paused) { video.play(); playBtn.textContent = '⏸'; }
   else { video.pause(); playBtn.textContent = '▶'; }
@@ -106,8 +106,7 @@ video.addEventListener('ended', () => { playBtn.textContent = '▶'; });
 video.addEventListener('timeupdate', () => {
   updatePlayhead(video.currentTime);
   updateTimeDisplay();
-  updateOverlay();
-  highlightCurrentLine();
+  updateOverlayAndHighlight();
 });
 
 function updatePlayhead(t) {
@@ -123,7 +122,7 @@ function updateTimeDisplay() {
   timeDisplay.textContent = cur + ' / ' + tot;
 }
 
-// ── SPEED ──
+//  SPEED 
 speedBtn.addEventListener('click', () => {
   state.speedIdx = (state.speedIdx + 1) % state.speeds.length;
   const spd = state.speeds[state.speedIdx];
@@ -131,37 +130,29 @@ speedBtn.addEventListener('click', () => {
   speedBtn.textContent = spd + '×';
 });
 
-// ── OVERLAY ──
-function updateOverlay() {
+//  OVERLAY + HIGHLIGHT 
+function updateOverlayAndHighlight() {
   const t = video.currentTime;
   const synced = state.lines
     .filter(l => l.timestamp !== null && l.timestamp <= t)
     .sort((a, b) => b.timestamp - a.timestamp);
 
   if (synced.length > 0) {
+    // show the line on the video overlay
     overlayText.textContent = synced[0].text;
     overlayText.classList.add('visible');
+    
+    //highlight the active line in the list
+    const idx = state.lines.indexOf(synced[0]);
+    lyricsList.querySelectorAll('.lyric-line').forEach((el, i) => {
+      el.style.outline = i === idx ? '1px solid var(--amber)' : '';
+    });
   } else {
     overlayText.classList.remove('visible');
   }
 }
 
-function highlightCurrentLine() {
-  const t = video.currentTime;
-  const synced = state.lines
-    .filter(l => l.timestamp !== null && l.timestamp <= t)
-    .sort((a, b) => b.timestamp - a.timestamp);
-
-  if (synced.length > 0) {
-    const idx = state.lines.indexOf(synced[0]);
-    const els = lyricsList.querySelectorAll('.lyric-line');
-    els.forEach((el, i) => {
-      el.style.outline = i === idx ? '1px solid var(--amber)' : '';
-    });
-  }
-}
-
-// ── MARKERS ON TIMELINE ──
+//  MARKERS ON TIMELINE 
 function renderMarkers() {
   timelineWrap.querySelectorAll('.lyric-marker').forEach(m => m.remove());
   if (!state.videoDuration) return;
@@ -183,7 +174,7 @@ function renderMarkers() {
   });
 }
 
-// ── TICK MARKS ──
+//  TICK MARKS 
 function drawTicks() {
   const canvas = tickCanvas;
   const wrap = timelineWrap;
@@ -194,6 +185,7 @@ function drawTicks() {
 
   if (!state.videoDuration) return;
 
+  // to change depending on zoom level
   let interval = 1;
   if (state.videoDuration > 120) interval = 10;
   else if (state.videoDuration > 60) interval = 5;
