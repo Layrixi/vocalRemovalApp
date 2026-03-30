@@ -40,3 +40,40 @@ document.getElementById('removeVocalsBtn').addEventListener('click', async () =>
     document.getElementById('vocalProcessingHint').style.display = 'none';
   }
 });
+
+// -- VIDEO RENDER API --
+
+document.getElementById('renderVideoBtn').addEventListener('click', async () => {
+  if (!state.uploadedVideoFilename) {
+    showPopUp('Load a video first');
+    return;
+  }
+  const synced = state.lines.filter(l => l.timestamp !== null);
+  if (synced.length === 0) {
+    showPopUp('Sync at least one line first');
+    return;
+  }
+
+  const btn = document.getElementById('renderVideoBtn');
+  btn.disabled = true;
+  btn.textContent = 'Rendering…';
+  try {
+    const res = await fetch('/api/render-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: state.uploadedVideoFilename, lines: synced }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Render failed');
+    const a = document.createElement('a');
+    a.href = data.download_url;
+    a.download = '';
+    a.click();
+    showPopUp('Rendered video ready!');
+  } catch (e) {
+    showPopUp('Error: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Render Video';
+  }
+});
