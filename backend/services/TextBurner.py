@@ -1,3 +1,4 @@
+from copy import error
 import subprocess
 import pathlib
 import tempfile
@@ -57,7 +58,7 @@ class TextSegment:
 class TextBurner:
     """Burns subtitle text onto a video using FFmpeg's subtitles filter."""
 
-    def __init__(self, ffmpeg_path: str = "ffmpeg", style: TextStyle | None = None):
+    def __init__(self, ffmpeg_path: str = "ffmpeg"):
         """
         Parameters
         ----------
@@ -74,7 +75,7 @@ class TextBurner:
         lines: list[TextSegment],
         video_codec: str = "libx264",
         audio_codec: str = "copy",
-        quality: int = 23,
+        quality: int = 23, #change if lyrics look shitty, lower is better quality but bigger file size
         verbose: bool = False,
         timeout: int = 300,
     ):
@@ -84,9 +85,12 @@ class TextBurner:
         Parameters
         ----------
         video_path  : input video file
-        lines       : list of dicts with keys ``text`` (str) and
-                      ``timestamp`` (float, seconds)
         output_path : where to save the rendered video (mp4)
+        lines       : list of TextSegment objects defining the text, timing, and style of each subtitle line
+        video_codec : ffmpeg video codec to use (default: libx264)
+        audio_codec : ffmpeg audio codec to use (default: copy)
+        quality     : ffmpeg CRF quality level (lower is better quality, default: 23)
+        verbose     : if True, print ffmpeg command and output; debug purposes
         timeout     : ffmpeg subprocess timeout in seconds
 
         Returns
@@ -99,23 +103,30 @@ class TextBurner:
         video_path  = pathlib.Path(video_path)
         output_path = pathlib.Path(output_path)
 
-        lines = [l for l in lines if l.get("timestamp") is not None]
+        #lines should be passed with style on them, rn they'll take the default, to be changed later
         if not lines:
             raise ValueError("No lines with a timestamp provided.")
 
-        srt_content = self._build_srt(lines)
-
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".srt", delete=False, encoding="utf-8"
-        ) as tmp:
-            tmp.write(srt_content)
-            srt_path = pathlib.Path(tmp.name)
-
+        #prepare lines for ffmpeg
+        fiter_lines = ",".join(
+            self._build_drawtext_filter(line.text, line.style, line.start_time, line.end_time)
+            for line in lines
+        )
+        
         try:
-            self._run_ffmpeg(video_path, srt_path, output_path, timeout)
-        finally:
-            srt_path.unlink(missing_ok=True)
-
+            self._run_ffmpeg([
+                self.ffmpeg_path, '-y',
+                '-i', str(video_path),
+                '-vf', fiter_lines,
+                '-c:v', video_codec,
+                '-crf', str(quality),
+                '-c:a', audio_codec,
+                str(output_path),
+            ], verbose=verbose)
+            print(f"Video saved to: {output_path}")
+        except error as e:
+            return RuntimeError(f"Failed to burn subtitles: {e}")
+            
         return output_path
 
     # Private helpers
@@ -130,40 +141,16 @@ class TextBurner:
         )
     
 
-    def _run(self, cmd: list[str], verbose: bool):
+    def _run_ffmpeg(self, cmd: list[str], verbose: bool):
         if verbose:
             print("Running:", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=not verbose, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"ffmpeg failed:\n{result.stderr}")
-    def _run_ffmpeg(
-        self,
-        video_path: pathlib.Path,
-        srt_path: pathlib.Path,
-        output_path: pathlib.Path,
-        timeout: int,
-    ):
-        srt_ffmpeg = str(srt_path).replace("\\", "/").replace(":", "\\:")
+    
+   
 
-        #to be changed later to not force the default
-        ass_style = self._to_force_style()
-        force_style = ",".join(f"{k}={v}" for k, v in ass_style.items())
-
-        cmd = [
-            self.ffmpeg_path, "-y",
-            "-i", str(video_path),
-            "-vf", f"subtitles='{srt_ffmpeg}':force_style='{force_style}'",
-            "-c:a", "copy",
-            str(output_path),
-        ]
-
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        if result.returncode != 0:
-            raise RuntimeError(
-                f"FFmpeg exited with code {result.returncode}:\n{result.stderr[-1000:]}"
-            )
-
-    #to implement later
+    #to implement later,basically rgb hex etc. to ASS
     @classmethod
     def _to_ass_color(cls, color: str):
         """Convert color like 'black@0.5' or '#RRGGBB' into ASS &HAABBGGRR."""
@@ -297,17 +284,20 @@ if __name__ == "__main__":
     OUTPUT_DIR  = pathlib.Path(__file__).parent.parent / "uploads" / "output"
     vid = "karabin.mp4"
     video_path = VIDEO_DIR / vid
+    burner = TextBurner()
 
-
+    #didnt define style, it will take default, in the final app it will be taken from the frontend, to be changed later
     LINES = [
-        {"text": "Hello world",        "timestamp": 0.0},
-        {"text": "TextBurner works",   "timestamp": 1.0},
-        {"text": "Subtitles on video", "timestamp": 2.0},
-        {"text": "Done",               "timestamp": 3.0},
+        TextSegment(text="Hello world",        start_time=0.0, end_time=1.0),
+        TextSegment(text="TextBurner works",   start_time=1.0, end_time=2.0),
+        TextSegment(text="Subtitles on video", start_time=2.0, end_time=3.0),
+        TextSegment(text="Done",               start_time=3.0, end_time=4.0),
     ]
 
-    # --- Burn with default style ---
     out = OUTPUT_DIR / f"{video_path.stem}_burned.mp4"
     print(f"--- Burning subtitles → {out} ---")
-    burner.burn(video_path, LINES, out)
-    print("Done.")
+    try:
+        out = burner.burn(video_path=video_path, output_path=out, lines=LINES)
+    except RuntimeError as e:
+        print(e)
+    print("Done")
