@@ -127,7 +127,7 @@ class TextBurner:
                 '-crf', str(quality),
                 '-c:a', audio_codec,
                 str(output_path),
-            ], verbose=verbose)
+            ], verbose=True)
             print(f"Video saved to: {output_path}")
         except RuntimeError as e:
             return RuntimeError(f"Failed to burn subtitles: {e}")
@@ -278,7 +278,7 @@ class TextBurner:
         # May generate a bug, if video is less than 99999 seconds and start time is not provided it may expand the video length    
         # to test later
         if start_time is not None:
-            parts.append(f"enable='between(t,{start_time},{end_time or 99999})'")
+            parts.append(f"enable='between(t\\,{start_time}\\,{end_time or 99999})'")
     
         return "drawtext=" + ":".join(parts)
         

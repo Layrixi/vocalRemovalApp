@@ -121,6 +121,7 @@ def render_video():
     output_path = OUTPUT_DIR / output_filename
     try:
         renderer = TextBurner(ffmpeg_path="ffmpeg")  # May add adjusting path if ffmpeg is not in system PATH, but it's in the readme so may not as well
+        #FILTER ERRORS OCCUR WHEN TEXT FROM FRONT-END, TODO TOMMOROW
         renderer.burn(video_path=video_path, output_path=output_path, lines=text_segments)
     except Exception as e:
         return jsonify({'error': f'Video rendering failed: {e}'}), 500
