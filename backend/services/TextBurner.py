@@ -5,6 +5,11 @@ import tempfile
 from dataclasses import dataclass, field
 from typing import Optional
 import shutil
+"""
+Class responsible for applying the text to the video.
+It's also responsible for the rendering process.
+"""
+
 
 def _require_ffmpeg():
     if shutil.which("ffmpeg") is None:
@@ -75,7 +80,7 @@ class TextBurner:
         lines: list[TextSegment],
         video_codec: str = "libx264",
         audio_codec: str = "copy",
-        quality: int = 23, #change if lyrics look shitty, lower is better quality but bigger file size
+        quality: int = 23, 
         verbose: bool = False,
         timeout: int = 300,
     ):
@@ -108,23 +113,23 @@ class TextBurner:
             raise ValueError("No lines with a timestamp provided.")
 
         #prepare lines for ffmpeg
-        fiter_lines = ",".join(
+        filter_lines = ",".join(
             self._build_drawtext_filter(line.text, line.style, line.start_time, line.end_time)
             for line in lines
         )
-        
+        print("hello")
         try:
             self._run_ffmpeg([
                 self.ffmpeg_path, '-y',
                 '-i', str(video_path),
-                '-vf', fiter_lines,
+                '-vf', filter_lines,
                 '-c:v', video_codec,
                 '-crf', str(quality),
                 '-c:a', audio_codec,
                 str(output_path),
             ], verbose=verbose)
             print(f"Video saved to: {output_path}")
-        except error as e:
+        except RuntimeError as e:
             return RuntimeError(f"Failed to burn subtitles: {e}")
             
         return output_path
@@ -240,11 +245,11 @@ class TextBurner:
     
         parts = [
             f"text='{self._escape(text)}'",
-            f"fontsize={style.font_size}",
-            f"fontcolor={style.font_color}",
-            f"x={x}",
-            f"y={y}",
-            f"line_spacing={style.line_spacing}",
+            f"fontsize='{style.font_size}'",
+            f"fontcolor='{style.font_color}'",
+            f"x='{x}'",
+            f"y='{y}'",
+            f"line_spacing='{style.line_spacing}'",
         ]
     
         if style.font_file:
@@ -252,22 +257,22 @@ class TextBurner:
     
         if style.box:
             parts += [
-                f"box=1",
-                f"boxcolor={style.box_color}",
-                f"boxborderw={style.box_padding}",
+                f"box='1'",
+                f"boxcolor='{style.box_color}'",
+                f"boxborderw='{style.box_padding}'",
             ]
     
         if style.shadow:
             parts += [
-                f"shadowcolor={style.shadow_color}",
-                f"shadowx={style.shadow_x}",
-                f"shadowy={style.shadow_y}",
+                f"shadowcolor='{style.shadow_color}'",
+                f"shadowx='{style.shadow_x}'",
+                f"shadowy='{style.shadow_y}'",
             ]
     
         if style.border_width > 0:
             parts += [
-                f"borderw={style.border_width}",
-                f"bordercolor={style.border_color}",
+                f"borderw='{style.border_width}'",
+                f"bordercolor='{style.border_color}'",
             ]
     
         # May generate a bug, if video is less than 99999 seconds and start time is not provided it may expand the video length    

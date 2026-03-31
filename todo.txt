@@ -1,4 +1,5 @@
 actual todo:
+-add style configuration and error handling in the render_video
 - error handling(few error handlers implemented, they raise but not handled on the front-end)
 - make user able to use generated audio with removed vocals
 - make it possible to render the final video
