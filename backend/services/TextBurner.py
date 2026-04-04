@@ -1,6 +1,7 @@
 import subprocess
 import pathlib
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from typing import Optional
 import shutil
@@ -16,6 +17,26 @@ It's also responsible for the rendering process.
 def _require_ffmpeg():
     if shutil.which("ffmpeg") is None:
         raise EnvironmentError("ffmpeg is not installed or not found in PATH.")
+    
+#TEMPORARY FOR BUG FIXING, probes the length of the video and stores it in config
+def _probe_and_set_duration(video_path: str | pathlib.Path):
+    """
+    Probe video duration using ffprobe and store it in config.
+    Used for testing and video processing.
+    """
+    try:
+        probe = subprocess.run(
+            [
+                "ffprobe", "-v", "error",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                str(video_path),
+            ],
+            capture_output=True, text=True, check=True,
+        )
+        set_video_duration(float(probe.stdout.strip()))
+    except Exception:
+        set_video_duration(0.0)
     
 @dataclass
 class TextStyle:
@@ -113,24 +134,31 @@ class TextBurner:
         if not lines:
             raise ValueError("No lines with a timestamp provided.")
 
-        #prepare lines for ffmpeg
-        #BUG if there's only 1 line
-        filter_lines = ",".join(
-            self._build_drawtext_filter(line.text, line.style, line.start_time, line.end_time)
-            for line in lines
-        )
-        print("hello")
         try:
-            self._run_ffmpeg([
-                self.ffmpeg_path, '-y',
-                '-i', str(video_path),
-                '-vf', filter_lines,
-                '-c:v', video_codec,
-                '-crf', str(quality),
-                '-c:a', audio_codec,
-                str(output_path),
-            ], verbose=True)
-            print(f"Video saved to: {output_path}")
+            #write text to a ttemporary file (special characters with ffmpeg issue) and build the filter arguments for ffmpeg
+            with tempfile.TemporaryDirectory(prefix="karaoke_textburner_") as temp_dir:
+                temp_dir_path = pathlib.Path(temp_dir)
+
+                filter_lines = ",".join(
+                    self._build_drawtext_filter(
+                        style=line.style,
+                        start_time=line.start_time,
+                        end_time=line.end_time,
+                        text_file=self._write_text_file(temp_dir_path, index, line.text),
+                    )
+                    for index, line in enumerate(lines)
+                )
+
+                self._run_ffmpeg([
+                    self.ffmpeg_path, '-y',
+                    '-i', str(video_path),
+                    '-vf', filter_lines,
+                    '-c:v', video_codec,
+                    '-crf', str(quality),
+                    '-c:a', audio_codec,
+                    str(output_path),
+                ], verbose=verbose)
+                print(f"Video saved to: {output_path}")
         except RuntimeError as e:
             return RuntimeError(f"Failed to burn subtitles: {e}")
             
@@ -146,8 +174,16 @@ class TextBurner:
             .replace("'",  "\\'")
             .replace(":",  "\\:")
             .replace(",",  "\\,")
+            .replace("%",  "\\%")
         )
-    
+
+    def _write_text_file(self, temp_dir: pathlib.Path, index: int, text: str) -> pathlib.Path:
+        text_file = temp_dir / f"line_{index}.txt"
+        text_file.write_text(text, encoding="utf-8")
+        return text_file
+
+    def _escape_path(self, path: str | pathlib.Path) -> str:
+        return self._escape(pathlib.Path(path).as_posix())
 
     def _run_ffmpeg(self, cmd: list[str], verbose: bool):
         if verbose:
@@ -171,15 +207,23 @@ class TextBurner:
         else:
             # treat as a raw pixel value / expression
             return position
-    def _build_drawtext_filter(self, text: str, style: TextStyle, start_time: Optional[float] = None,
-                            end_time: Optional[float] = None) -> str:
+    def _build_drawtext_filter(self, style: TextStyle, start_time: Optional[float] = None,
+                            end_time: Optional[float] = None, text: Optional[str] = None,
+                            text_file: Optional[str | pathlib.Path] = None) -> str:
         """Build a single drawtext filter fragment."""
     
         x = self._position_expr("w", "tw", style.horizontal_position)
         y = self._position_expr("h", "th", style.vertical_position)
     
+        if text_file is not None:
+            text_part = f"textfile='{self._escape_path(text_file)}'"
+        elif text is not None:
+            text_part = f"text='{self._escape(text)}'"
+        else:
+            raise ValueError("Either text or text_file must be provided.")
+
         parts = [
-            f"text={self._escape(text)}",
+            text_part,
             f"fontsize='{style.font_size}'",
             f"fontcolor='{style.font_color}'",
             f"x='{x}'",
@@ -223,7 +267,7 @@ if __name__ == "__main__":
 
     VIDEO_DIR  = pathlib.Path(__file__).parent.parent / "uploads" / "video"
     OUTPUT_DIR  = pathlib.Path(__file__).parent.parent / "uploads" / "output"
-    vid = "karabin.mp4"
+    vid = "chronos tester.mp4"
     video_path = VIDEO_DIR / vid
     burner = TextBurner()
 
@@ -235,20 +279,19 @@ if __name__ == "__main__":
         TextSegment(text="Done",               start_time=3.0, end_time=4.0),
     ]
     LINES2 = [
-        TextSegment(text="Let's get a little bit dirty",            start_time=0.0, end_time=0.0,  style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)),
-        TextSegment(text='A little bit nasty, a little bit gross',  start_time=0.0, end_time=0.0,  style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)),
-        TextSegment(text="Come on, it's never too early",           start_time=0.0, end_time=None, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10))
-    ]
+        TextSegment(text='Sudden ringing, I slowly get up', start_time=0.0, end_time=4.519145, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)),
+        TextSegment(text='And turn off the noise, already fed up', start_time=4.519145, end_time=5.561934, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)), 
+        TextSegment(text='And turn off the noise, already fed', start_time=5.561934, end_time=6.772827, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)), 
+        TextSegment(text="Reminding me that tomorrow's hopeless", start_time=6.772827, end_time=7.849959, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10)), 
+        TextSegment(text="I'm slowly rotting inside a jail cell", start_time=7.849959, end_time=None, style=TextStyle(font_file=None, font_size=64, font_color='white', box=True, box_color='black@0.7', box_padding=10, shadow=False, shadow_color='black@0.6', shadow_x=3, shadow_y=3, border_width=0, border_color='black', vertical_position='center', horizontal_position='center', line_spacing=10))]
 
     out = OUTPUT_DIR / f"{video_path.stem}_burned.mp4"
     _probe_and_set_duration(video_path)
     video_duration = get_video_duration()
     print(f"Video duration: {video_duration} seconds")
     print(f"--- Burning subtitles → {out} ---")
-    Segment = TextBurner()._build_drawtext_filter(LINES2[2].text, LINES2[2].style, LINES2[2].start_time, LINES2[2].end_time)
-    print(Segment)
     try:
-        out = burner.burn(video_path=video_path, output_path=out, lines=LINES2)
+        out = burner.burn(video_path=video_path, output_path=out, lines=LINES2,verbose=True)
     except RuntimeError as e:
         print(e)
     
