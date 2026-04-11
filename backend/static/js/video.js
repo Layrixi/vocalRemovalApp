@@ -138,8 +138,8 @@ function updateOverlayAndHighlight() {
     .sort((a, b) => b.timestamp - a.timestamp);
 
   if (synced.length > 0) {
-    // show the line on the video overlay
-    overlayText.textContent = synced[0].text;
+    // show the line on the video overlay, wrapped to match TextBurner output
+    overlayText.innerHTML = wrapText(synced[0].text).map(escHtml).join('<br>');
     overlayText.classList.add('visible');
     
     //highlight the active line in the list

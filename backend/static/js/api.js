@@ -1,4 +1,20 @@
-﻿// -- VOCAL REMOVAL API --
+﻿// -- WRAP CONFIG --
+
+// Fetch TextBurner wrap constants from the server and cache them in state.
+async function fetchWrapConfig() {
+  try {
+    const res = await fetch('/api/wrap-config');
+    if (!res.ok) return;
+    const data = await res.json();
+    state.wrapConfig = data;
+  } catch (_) {
+    // keep state defaults on failure
+  }
+}
+fetchWrapConfig();
+
+
+// -- VOCAL REMOVAL API --
 
 async function uploadVideo(file) {
   const formData = new FormData();

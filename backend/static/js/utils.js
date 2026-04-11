@@ -39,3 +39,42 @@ function toSRTTime(s) {
   const ms = Math.round((s % 1) * 1000).toString().padStart(3, '0');
   return `${h}:${m}:${sec},${ms}`;
 }
+
+// Mirrors TextBurner._wrap_text.
+// play_res_x uses the live rendered width of the video element so line breaks
+// match what is visually shown in the overlay. font_size and char_width_ratio
+// come from state.wrapConfig, populated by /api/wrap-config on page load.
+function wrapText(text) {
+  const { font_size, char_width_ratio } = state.wrapConfig;
+  const play_res_x = video.clientWidth || 1920;
+  const usablePx     = play_res_x * 0.9;
+  const charsPerLine = Math.max(1, Math.floor(usablePx / (font_size * char_width_ratio)));
+
+  // split words into smaller ones in case they are very long
+  const words = [];
+  for (const word of text.split(' ')) {
+    let w = word;
+    while (w.length > charsPerLine) {
+      words.push(w.slice(0, charsPerLine));
+      w = w.slice(charsPerLine);
+    }
+    if (w) words.push(w);
+  }
+
+  // build lines 1-by-1, until the line exceeds the character limit
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    if (!current) {
+      //line is empty
+      current = word;
+    } else if (current.length + 1 + word.length <= charsPerLine) {
+      current += ' ' + word;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current) lines.push(current);
+  return lines;
+}

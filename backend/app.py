@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import uuid
 import pathlib
+import json
 
 # text burning
 import subprocess
@@ -10,7 +11,7 @@ import soundfile as sf
 from werkzeug.utils import secure_filename
 import sys
 sys.path.append(str(pathlib.Path(__file__).parent))
-from config import check_device, set_video_duration, get_video_duration
+from config import check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 from services.TextBurner import TextBurner, TextSegment
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 
@@ -47,18 +48,22 @@ def upload_video():
     save_path = UPLOAD_VIDEO_DIR / unique_name
     f.save(str(save_path))
 
-    # probe duration and store it in config
+    # probe duration and dimensions and store them in config
     try:
         probe = subprocess.run(
             [
                 "ffprobe", "-v", "error",
-                "-show_entries", "format=duration",
-                "-of", "default=noprint_wrappers=1:nokey=1",
+                "-select_streams", "v:0",
+                "-show_entries", "format=duration:stream=width,height",
+                "-of", "json",
                 str(save_path),
             ],
             capture_output=True, text=True, check=True,
         )
-        set_video_duration(float(probe.stdout.strip()))
+        probe_data = json.loads(probe.stdout)
+        set_video_duration(float(probe_data["format"]["duration"]))
+        stream = probe_data["streams"][0]
+        set_video_dimensions(int(stream["width"]), int(stream["height"]))
     except Exception:
         set_video_duration(0.0)
 
@@ -142,6 +147,17 @@ def render_video():
         return jsonify({'error': f'Video rendering failed: {e}'}), 500
 
     return jsonify({'download_url': f'/api/download/{output_filename}'})
+
+
+@app.route('/api/wrap-config', methods=['GET'])
+def get_wrap_config():
+    """Return the constants needed to replicate TextBurner._wrap_text on the frontend."""
+    from services.TextBurner import TextStyle
+    style = TextStyle()
+    return jsonify({
+        'font_size':        style.font_size,
+        'char_width_ratio': get_char_width_ratio(),
+    })
 
 
 if __name__ == '__main__':
