@@ -123,9 +123,137 @@
 
 <div class="pop_up" id="pop_up"></div>
 
+<!-- Style editor panel -->
+<div class="style-panel" id="stylePanel">
+  <div class="sp-header">
+    <span class="sp-label" id="se_line_label">Style</span>
+    <button class="sp-close" id="se_close">✕</button>
+  </div>
+
+  <div class="sp-body">
+
+    <!-- Typography -->
+    <div class="sp-section">Typography</div>
+    <div class="sp-row">
+      <label>Font name</label>
+      <input type="text" id="se_font_file" placeholder="Comic Sans MS">
+    </div>
+    <div class="sp-row">
+      <label>Font size</label>
+      <input type="number" id="se_font_size" min="8" max="300">
+    </div>
+    <div class="sp-row">
+      <label>Font color</label>
+      <div class="sp-color">
+        <input type="color" id="se_font_color_rgb">
+        <input type="range"  id="se_font_color_alpha" min="0" max="255">
+        <span id="se_font_color_pct" class="sp-pct">100%</span>
+      </div>
+    </div>
+
+    <!-- Outline -->
+    <div class="sp-section">Outline</div>
+    <div class="sp-row">
+      <label>Width</label>
+      <input type="number" id="se_border_width" min="0" max="20">
+    </div>
+    <div class="sp-row">
+      <label>Color</label>
+      <div class="sp-color">
+        <input type="color" id="se_border_color_rgb">
+        <input type="range"  id="se_border_color_alpha" min="0" max="255">
+        <span id="se_border_color_pct" class="sp-pct">100%</span>
+      </div>
+    </div>
+
+    <!-- Box -->
+    <div class="sp-section">
+      Background box
+      <label class="sp-toggle">
+        <input type="checkbox" id="se_box">
+        <span class="sp-track"></span>
+      </label>
+    </div>
+    <div id="se_box_fields" style="display:none">
+      <div class="sp-row">
+        <label>Box color</label>
+        <div class="sp-color">
+          <input type="color" id="se_box_color_rgb">
+          <input type="range"  id="se_box_color_alpha" min="0" max="255">
+          <span id="se_box_color_pct" class="sp-pct">100%</span>
+        </div>
+      </div>
+      <div class="sp-row">
+        <label>Padding</label>
+        <input type="number" id="se_box_padding" min="0" max="60">
+      </div>
+    </div>
+
+    <!-- Shadow -->
+    <div class="sp-section">
+      Drop shadow
+      <label class="sp-toggle">
+        <input type="checkbox" id="se_shadow">
+        <span class="sp-track"></span>
+      </label>
+    </div>
+    <div id="se_shadow_fields" style="display:none">
+      <div class="sp-row">
+        <label>Color</label>
+        <div class="sp-color">
+          <input type="color" id="se_shadow_color_rgb">
+          <input type="range"  id="se_shadow_color_alpha" min="0" max="255">
+          <span id="se_shadow_color_pct" class="sp-pct">100%</span>
+        </div>
+      </div>
+      <div class="sp-row">
+        <label>X offset</label>
+        <input type="number" id="se_shadow_x" min="-50" max="50">
+      </div>
+      <div class="sp-row">
+        <label>Y offset</label>
+        <input type="number" id="se_shadow_y" min="-50" max="50">
+      </div>
+    </div>
+
+    <!-- Position -->
+    <div class="sp-section">Position</div>
+    <div class="sp-row">
+      <label>Horizontal</label>
+      <select id="se_horizontal_position">
+        <option value="left">Left</option>
+        <option value="center">Center</option>
+        <option value="right">Right</option>
+      </select>
+    </div>
+    <div class="sp-row">
+      <label>Vertical</label>
+      <select id="se_vertical_position">
+        <option value="top">Top</option>
+        <option value="center">Center</option>
+        <option value="bottom">Bottom</option>
+      </select>
+    </div>
+
+    <!-- Spacing -->
+    <div class="sp-section">Spacing</div>
+    <div class="sp-row">
+      <label>Line spacing</label>
+      <input type="number" id="se_line_spacing" min="0" max="200">
+    </div>
+
+  </div><!-- /.sp-body -->
+
+  <div class="sp-footer">
+    <button class="btn" id="se_reset">Reset</button>
+    <button class="btn" id="se_apply_all">Apply to all</button>
+  </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/state.js') }}"></script>
 <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
 <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/style.js') }}"></script>
 <script src="{{ url_for('static', filename='js/video.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lyrics.js') }}"></script>
 <script src="{{ url_for('static', filename='js/export.js') }}"></script>

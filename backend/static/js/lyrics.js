@@ -39,11 +39,11 @@ function parseAndRenderLyrics() {
     const m = l.match(lrcPattern);
     if (m) {
       const secs = parseFloat(m[1]) * 60 + parseFloat(m[2]);
-      return { text: m[3], timestamp: secs };
+      return { text: m[3], timestamp: secs, style: { ...DEFAULT_STYLE } };
     }
     // SRT: strip timing lines
     if (/^\d+$/.test(l) || /\d{2}:\d{2}:\d{2},\d{3}/.test(l) || /-->/.test(l)) return null;
-    return { text: l.replace(/\[.*?\]/g, '').trim(), timestamp: null };
+    return { text: l.replace(/\[.*?\]/g, '').trim(), timestamp: null, style: { ...DEFAULT_STYLE } };
   }).filter(l => l && l.text.length > 0);
 
   renderLyricsList();
@@ -69,7 +69,10 @@ function renderLyricsList() {
       ${line.timestamp !== null ? `<span class="remove-ts" data-idx="${i}" title="Remove timestamp">✕</span>` : ''}
     `;
 
-    el.addEventListener('click', () => selectLine(i));
+    el.addEventListener('click', () => {
+      selectLine(i);
+      openStyleEditor(i);
+    });
     lyricsList.appendChild(el);
   });
 
