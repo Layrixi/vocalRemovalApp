@@ -356,6 +356,9 @@
    transition: opacity 0.2s;
    border-radius: 3px;
    display: block;
+   /* breaks super long words, rest is handled by js */
+   overflow-wrap: break-word;
+   word-break: break-word;
  }
 
  .overlay-text.visible { opacity: 1; }
