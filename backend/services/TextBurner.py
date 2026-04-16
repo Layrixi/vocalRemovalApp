@@ -234,7 +234,7 @@ class TextBurner:
         """Map horizontal/vertical position names to an ASS alignment value (1-9)."""
         return self._ALIGNMENT_MAP.get((h_pos, v_pos), 5)
 
-    def _style_to_ass_line(self, style: TextStyle, style_name: str) -> str:
+    def _style_to_ass_line(self, style: TextStyle, style_name: str, height: int = 1080) -> str:
         """Convert a TextStyle to a single ASS [V4+ Styles] line.
            ASS field goes as: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, 
            Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, 
@@ -275,7 +275,7 @@ class TextBurner:
             "0",                   # Angle
             str(border_style), str(outline), str(shadow),
             str(alignment),
-            "10", "10", "10",      # MarginL, MarginR, MarginV
+            "10", "10", str(int(height * 0.14)) if style.vertical_position in ("top", "bottom") else "0",  # MarginL, MarginR, MarginV
             "1",                   # Encoding
         ]
         return "Style: " + ",".join(fields)
@@ -293,7 +293,7 @@ class TextBurner:
             style_indices.append(idx)
 
         style_lines = "\n".join(
-            self._style_to_ass_line(s, f"Style{i}")
+            self._style_to_ass_line(s, f"Style{i}", height)
             for i, s in enumerate(unique_styles)
         )
 
