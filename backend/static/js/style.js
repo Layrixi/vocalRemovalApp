@@ -7,9 +7,9 @@ let _editingIdx = null;
 // ── Apply a style object to the live video overlay ──────────────────────────
 
 const _OVERLAY_POS = {
-  bottom: { top: '',    bottom: '14%', transform: 'translateX(-50%)' },
-  center: { top: '50%', bottom: '',   transform: 'translate(-50%, -50%)' },
-  top:    { top: '10%', bottom: '',   transform: 'translateX(-50%)' },
+  bottom: { top: '',    bottom: '14%', transform: 'translateX(-50%)',      alignItems: 'flex-end'   },
+  center: { top: '50%', bottom: '',   transform: 'translate(-50%, -50%)', alignItems: 'center'     },
+  top:    { top: '14%', bottom: '',   transform: 'translateX(-50%)',      alignItems: 'flex-start' },
 };
 
 function applyStyleToOverlay(style) {
@@ -46,9 +46,10 @@ function applyStyleToOverlay(style) {
   // Reposition overlay container
   if (overlay) {
     const pos = _OVERLAY_POS[style.vertical_position] || _OVERLAY_POS.bottom;
-    overlay.style.top       = pos.top;
-    overlay.style.bottom    = pos.bottom;
-    overlay.style.transform = pos.transform;
+    overlay.style.top        = pos.top;
+    overlay.style.bottom     = pos.bottom;
+    overlay.style.transform  = pos.transform;
+    overlay.style.alignItems = pos.alignItems;
   }
 }
 
@@ -202,5 +203,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (elem.id === 'se_shadow')     _toggleSection('se_shadow_fields', elem.checked);
       _commitStyle();
     });
+  });
+
+  // Field tooltips — show on hover over any label with data-tip inside the style panel
+  document.getElementById('stylePanel').addEventListener('mouseover', e => {
+    const label = e.target.closest('label[data-tip]');
+    if (label) showFieldTip(label.dataset.tip, label);
+  });
+  document.getElementById('stylePanel').addEventListener('mouseout', e => {
+    if (e.target.closest('label[data-tip]')) hideFieldTip();
   });
 });

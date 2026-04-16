@@ -25,6 +25,19 @@ function showPopUp(msg, duration = 2200) {
   setTimeout(() => t.classList.remove('show'), duration);
 }
 
+function showFieldTip(msg, anchorEl) {
+  const tip = document.getElementById('field_tip');
+  tip.textContent = msg;
+  tip.classList.add('show');
+  const rect = anchorEl.getBoundingClientRect();
+  tip.style.top  = (rect.bottom + 6) + 'px';
+  tip.style.left = rect.left + 'px';
+}
+
+function hideFieldTip() {
+  document.getElementById('field_tip').classList.remove('show');
+}
+
 function download(filename, content) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([content], { type: 'text/plain' }));

@@ -122,6 +122,7 @@
 </div>
 
 <div class="pop_up" id="pop_up"></div>
+<div class="field-tip" id="field_tip"></div>
 
 <!-- Style editor panel -->
 <div class="style-panel" id="stylePanel">
@@ -135,15 +136,15 @@
     <!-- Typography -->
     <div class="sp-section">Typography</div>
     <div class="sp-row">
-      <label>Font name</label>
+      <label data-tip="Font to use for the text. Enter a font name installed on your system, or leave blank for the default.">Font name</label>
       <input type="text" id="se_font_file" placeholder="Comic Sans MS">
     </div>
     <div class="sp-row">
-      <label>Font size</label>
+      <label data-tip="Size of the text in ASS units. Scales relative to the video height.">Font size</label>
       <input type="number" id="se_font_size" min="8" max="300">
     </div>
     <div class="sp-row">
-      <label>Font color</label>
+      <label data-tip="Color and opacity of the text. Use the slider to adjust transparency.">Font color</label>
       <div class="sp-color">
         <input type="color" id="se_font_color_rgb">
         <input type="range"  id="se_font_color_alpha" min="0" max="255">
@@ -154,11 +155,11 @@
     <!-- Outline -->
     <div class="sp-section">Outline</div>
     <div class="sp-row">
-      <label>Width</label>
+      <label data-tip="Thickness of the outline drawn around each character. Set to 0 to disable.">Width</label>
       <input type="number" id="se_border_width" min="0" max="20">
     </div>
     <div class="sp-row">
-      <label>Color</label>
+      <label data-tip="Color and opacity of the outline.">Color</label>
       <div class="sp-color">
         <input type="color" id="se_border_color_rgb">
         <input type="range"  id="se_border_color_alpha" min="0" max="255">
@@ -176,7 +177,7 @@
     </div>
     <div id="se_box_fields" style="display:none">
       <div class="sp-row">
-        <label>Box color</label>
+        <label data-tip="Fill color and opacity of the background box behind the text.">Box color</label>
         <div class="sp-color">
           <input type="color" id="se_box_color_rgb">
           <input type="range"  id="se_box_color_alpha" min="0" max="255">
@@ -184,7 +185,7 @@
         </div>
       </div>
       <div class="sp-row">
-        <label>Padding</label>
+        <label data-tip="Extra space in pixels between the text and the edges of the background box.">Padding</label>
         <input type="number" id="se_box_padding" min="0" max="60">
       </div>
     </div>
@@ -199,7 +200,7 @@
     </div>
     <div id="se_shadow_fields" style="display:none">
       <div class="sp-row">
-        <label>Color</label>
+        <label data-tip="Color and opacity of the drop shadow.">Color</label>
         <div class="sp-color">
           <input type="color" id="se_shadow_color_rgb">
           <input type="range"  id="se_shadow_color_alpha" min="0" max="255">
@@ -207,11 +208,11 @@
         </div>
       </div>
       <div class="sp-row">
-        <label>X offset</label>
+        <label data-tip="Horizontal shadow offset in pixels. Positive moves the shadow right.">X offset</label>
         <input type="number" id="se_shadow_x" min="-50" max="50">
       </div>
       <div class="sp-row">
-        <label>Y offset</label>
+        <label data-tip="Vertical shadow offset in pixels. Positive moves the shadow down.">Y offset</label>
         <input type="number" id="se_shadow_y" min="-50" max="50">
       </div>
     </div>
@@ -219,7 +220,7 @@
     <!-- Position -->
     <div class="sp-section">Position</div>
     <div class="sp-row">
-      <label>Horizontal spacing</label>
+      <label data-tip="Horizontal alignment of the text: left, center, or right.">Horizontal spacing</label>
       <select id="se_horizontal_position">
         <option value="left">Left</option>
         <option value="center">Center</option>
@@ -227,7 +228,7 @@
       </select>
     </div>
     <div class="sp-row">
-      <label>Vertical spacing</label>
+      <label data-tip="Vertical placement of the text on the video: top, center, or bottom.">Vertical spacing</label>
       <select id="se_vertical_position">
         <option value="top">Top</option>
         <option value="center">Center</option>
