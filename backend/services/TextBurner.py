@@ -81,8 +81,6 @@ class TextStyle:
     # ── Horizontal position
     horizontal_position: str    = "center"
  
-    # ── Spacing
-    line_spacing: int           = 30      
 
 @dataclass
 class TextSegment:

@@ -133,14 +133,17 @@ speedBtn.addEventListener('click', () => {
 //  OVERLAY + HIGHLIGHT 
 function updateOverlayAndHighlight() {
   const t = video.currentTime;
+  // sorted for lookup on which line to show onthe overlay
   const synced = state.lines
     .filter(l => l.timestamp !== null && l.timestamp <= t)
     .sort((a, b) => b.timestamp - a.timestamp);
 
   if (synced.length > 0) {
     // show the line on the video overlay, wrapped to match TextBurner output
-    overlayText.innerHTML = wrapText(synced[0].text).map(escHtml).join('<br>');
+    overlayText.innerHTML = wrapText(synced[0].text, synced[0].style?.font_size).map(escHtml).join('<br>');
     overlayText.classList.add('visible');
+    // apply this line's per-line style
+    if (synced[0].style) applyStyleToOverlay(synced[0].style);
     
     //highlight the active line in the list
     const idx = state.lines.indexOf(synced[0]);
@@ -206,4 +209,7 @@ function drawTicks() {
   }
 }
 
-window.addEventListener('resize', drawTicks);
+window.addEventListener('resize', () => {
+  drawTicks();
+  updateOverlayAndHighlight();
+});

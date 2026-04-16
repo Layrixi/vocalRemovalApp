@@ -1,9 +1,56 @@
 // STYLE EDITOR
 // Slide-in panel that lets the user configure per-line ASS TextStyle values.
 // Updates state.lines[idx].style on every input change.
-// Overlay / render wiring is left for a later step.
 
 let _editingIdx = null;
+
+// ── Apply a style object to the live video overlay ──────────────────────────
+
+const _OVERLAY_POS = {
+  bottom: { top: '',    bottom: '14%', transform: 'translateX(-50%)' },
+  center: { top: '50%', bottom: '',   transform: 'translate(-50%, -50%)' },
+  top:    { top: '10%', bottom: '',   transform: 'translateX(-50%)' },
+};
+
+function applyStyleToOverlay(style) {
+  const elem      = overlayText;
+  const overlay = document.querySelector('.video-lyrics-overlay');
+
+  const fontName = style.font_file
+    ? style.font_file.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '')
+    : 'Comic Sans MS';
+
+  elem.style.fontFamily       = `"${fontName}", sans-serif`;
+  elem.style.color            = style.font_color;
+  elem.style.webkitTextStroke = style.border_width > 0
+    ? `${style.border_width}px ${style.border_color}` : '0';
+
+  if (style.box) {
+    elem.style.backgroundColor = style.box_color;
+    elem.style.padding         = style.box_padding + 'px';
+  } else {
+    elem.style.backgroundColor = 'transparent';
+    elem.style.padding         = '0';
+  }
+
+  elem.style.textShadow = style.shadow
+    ? `${style.shadow_x}px ${style.shadow_y}px 0 ${style.shadow_color}`
+    : 'none';
+
+  elem.style.textAlign = style.horizontal_position;
+
+  // Scale font size
+  const videoH = video.clientHeight || 360;
+  elem.style.fontSize = (style.font_size / state.wrapConfig.play_res_y * videoH) + 'px';
+
+  // Reposition overlay container
+  if (overlay) {
+    const pos = _OVERLAY_POS[style.vertical_position] || _OVERLAY_POS.bottom;
+    overlay.style.top       = pos.top;
+    overlay.style.bottom    = pos.bottom;
+    overlay.style.transform = pos.transform;
+  }
+}
 
 // ── Open / close ──────────────────────────────────────────────────────────────
 
@@ -34,7 +81,6 @@ function openStyleEditor(idx) {
 
   _setField('se_horizontal_position', s.horizontal_position);
   _setField('se_vertical_position',   s.vertical_position);
-  _setField('se_line_spacing',        s.line_spacing);
 
   _toggleSection('se_box_fields',    s.box);
   _toggleSection('se_shadow_fields', s.shadow);
@@ -118,7 +164,15 @@ function _commitStyle() {
 
   s.horizontal_position = document.getElementById('se_horizontal_position').value;
   s.vertical_position   = document.getElementById('se_vertical_position').value;
-  s.line_spacing        = parseInt(document.getElementById('se_line_spacing').value) || 0;
+
+  // Live-preview on the overlay if this line is currently displayed
+  const t = video.currentTime;
+  const active = state.lines
+    .filter(l => l.timestamp !== null && l.timestamp <= t)
+    .sort((a, b) => b.timestamp - a.timestamp)[0];
+  if (active && state.lines.indexOf(active) === _editingIdx) {
+    applyStyleToOverlay(s);
+  }
 }
 
 // ── Wire up inputs ────────────────────────────────────────────────────────────

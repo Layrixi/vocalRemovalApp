@@ -41,14 +41,19 @@ function toSRTTime(s) {
 }
 
 // Mirrors TextBurner._wrap_text.
-// play_res_x uses the live rendered width of the video element so line breaks
-// match what is visually shown in the overlay. font_size and char_width_ratio
-// come from state.wrapConfig, populated by /api/wrap-config on page load.
-function wrapText(text) {
-  const { font_size, char_width_ratio } = state.wrapConfig;
-  const play_res_x = video.clientWidth || 1920;
+// play_res_x/videoH use live rendered dimensions of the video element so line
+// breaks match what is visually shown in the overlay. font_size is scaled from
+// ASS units to screen pixels before computing charsPerLine, matching the same
+// coordinate space as the overlay. Reads state.wrapConfig (from /api/wrap-config).
+// fontSize: optional per-line font_size in ASS units; defaults to state.wrapConfig.font_size.
+function wrapText(text, fontSize) {
+  const { font_size: defaultFontSize, char_width_ratio, play_res_y } = state.wrapConfig;
+  const assFont    = fontSize ?? defaultFontSize;
+  const play_res_x = video.clientWidth  || 1920;
+  const videoH     = video.clientHeight || 360;
+  const fontPx     = assFont / play_res_y * videoH;  // scale ASS units → screen pixels
   const usablePx     = play_res_x * 0.9;
-  const charsPerLine = Math.max(1, Math.floor(usablePx / (font_size * char_width_ratio)));
+  const charsPerLine = Math.max(1, Math.floor(usablePx / (fontPx * char_width_ratio)));
 
   // split words into smaller ones in case they are very long
   const words = [];

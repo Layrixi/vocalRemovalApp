@@ -1,6 +1,5 @@
 actual todo:
 - make front-end display look the same as then final render
-- add style configuration on the frontend
 - error handling(few error handlers implemented, they raise but not handled on the front-end)
 - make user able to use generated audio with removed vocals
 - make it possible to render the final video
@@ -16,7 +15,7 @@ actual todo:
 - make it possible to switch between instrumental and vocal version of audio
 - add fonts so ffmpeg gets more fonts to choose from
 - build own removal model
-
+- bug: line displaying dynamic scaling acts weird when the window is getting too small (like phone size)
 - uploads stay in the "cache".
 - !may not be a problem; If video gets deleted, it stays in the cache but it may generate problems with rendering later on.\
     Generates problem with vocal removal - file not found. Add a fix that gets the video again from the cache.

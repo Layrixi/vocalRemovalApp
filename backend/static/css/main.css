@@ -347,17 +347,11 @@
  }
 
  .overlay-text {
-   font-family: 'Syne', sans-serif;
-   font-size: clamp(14px, 2.5vw, 22px);
+   font-size: clamp(14px, 2.5vw, 22px); /* overridden by applyStyleToOverlay when a line is active */
    font-weight: 800;
-   color: #fff;
-   text-shadow: 0 0 20px rgba(0,0,0,0.9), 2px 2px 4px rgba(0,0,0,0.8);
    letter-spacing: 0.04em;
-   text-transform: uppercase;
    opacity: 0;
    transition: opacity 0.2s;
-   background: rgba(0,0,0,0.45);
-   padding: 6px 18px;
    border-radius: 3px;
    display: inline-block;
  }
@@ -615,7 +609,7 @@
    position: fixed;
    top: 0;
    right: 0;
-   width: 290px;
+   width: 340px;
    height: 100vh;
    background: var(--panel);
    border-left: 1px solid var(--border);
