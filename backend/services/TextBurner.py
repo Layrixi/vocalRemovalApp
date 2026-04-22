@@ -269,7 +269,7 @@ class TextBurner:
         if mode =="box_only":
             primary_color = "&HFF" + primary_color[4:]
             border_style  = 3
-            outline       = max(style.box_padding, 0)  
+            outline       = max(style.box_padding, 1)  
             shadow        = 0
             # set both for libass build compability
             outline_color = self._color_to_ass(style.box_color)
@@ -278,8 +278,8 @@ class TextBurner:
             border_style  = 1
             outline       = style.outline_width
             outline_color = self._color_to_ass(style.outline_color)
-            shadow        = style.shadow_offset
-            back_color    = self._color_to_ass(style.shadow_color)
+            shadow        = style.shadow_offset if style.shadow else 0
+            back_color    = self._color_to_ass(style.shadow_color) if style.shadow else "&HFF000000"
 
         alignment = self._position_to_alignment(style.horizontal_position, style.vertical_position)
         font_name = pathlib.Path(style.font_file).stem if style.font_file else "Comic Sans MS"
