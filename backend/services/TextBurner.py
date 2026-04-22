@@ -62,7 +62,7 @@ class TextStyle:
     # ── Background box
     box:          bool          = False
     box_color:    str           = "#000000FF"
-    box_padding:  int           = 0      
+    box_padding:  int           = 1     
  
     # ── Drop shadow
     shadow:       bool          = False
