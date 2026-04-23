@@ -128,15 +128,12 @@ def download_file(filename):
 
 
 # POST { filename, lines: [{text, timestamp}, …] }
-# Builds SRT from lines, burns it into the video via FFmpeg,
+# Passes the video to the burn function, which burns the text into the video 
+# with user-provided style or default one
 # and returns a download link — no re-upload needed.
-
-#add style configuration and error handling later
 @app.route('/api/render-video', methods=['POST'])
 def render_video():
-    data = request.get_json()
-    #error handling and data loading
-    
+    data = request.get_json()    
     
     if not data or 'filename' not in data or 'lines' not in data:
         return jsonify({'error': 'filename and lines required'}), 400
