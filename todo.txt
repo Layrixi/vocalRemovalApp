@@ -5,6 +5,7 @@ actual todo:
 - make it possible to render the final video
     here, send json from front to backend with synchronized lines list, handle the synchro text adding in the backend and render
 - make it possible to scale the time bar
+- apply karaoke format of ASS or make my own (depend on the ASS version)
 - handle SRT and LRC formats
 - (basically save progress) at the init, load the data from uploads so the user can work with the last used video if not finished working on it.
 - after the above, add a cleanup button so user can work on a new file.
