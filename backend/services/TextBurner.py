@@ -78,6 +78,9 @@ class TextStyle:
  
     # ── Horizontal position
     horizontal_position: str    = "center"
+
+    # ── Encoding (ASS encoding value; 1 = OS default, most cases UTF-8)
+    encoding:           int           = 1
  
 
 @dataclass
@@ -295,7 +298,7 @@ class TextBurner:
             str(border_style), str(outline), str(shadow),
             str(alignment),
             "10", "10", str(int(height * 0.14)) if style.vertical_position in ("top", "bottom") else "0",  # MarginL, MarginR, MarginV
-            "1",                   # Encoding
+            str(style.encoding),   # Encoding
         ]
         return "Style: " + ",".join(fields)
 

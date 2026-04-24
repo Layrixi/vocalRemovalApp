@@ -149,6 +149,37 @@
         <span id="se_font_color_pct" class="sp-pct">100%</span>
       </div>
     </div>
+    <div class="sp-row">
+      <label data-tip="Make the text bold.">Bold</label>
+      <label class="sp-toggle"><input type="checkbox" id="se_bold"><span class="sp-track"></span></label>
+    </div>
+    <div class="sp-row">
+      <label data-tip="Make the text italic.">Italic</label>
+      <label class="sp-toggle"><input type="checkbox" id="se_italic"><span class="sp-track"></span></label>
+    </div>
+    <div class="sp-row">
+      <label data-tip="Underline the text.">Underline</label>
+      <label class="sp-toggle"><input type="checkbox" id="se_underline"><span class="sp-track"></span></label>
+    </div>
+    <div class="sp-row">
+      <label data-tip="Strike through the text.">Strikeout</label>
+      <label class="sp-toggle"><input type="checkbox" id="se_strikeout"><span class="sp-track"></span></label>
+    </div>
+    <div class="sp-row">
+      <label data-tip="Spacing between letters in the text.">Letter spacing</label>
+      <input type="number" id="se_letter_spacing" min="0" max="100">
+    </div>
+    <div class="sp-row">
+      <label data-tip="Rotation angle of the text in degrees.">Angle</label>
+      <input type="number" id="se_angle" min="0" max="360">
+    </div>
+    <div class="sp-row sp-advanced-toggle">
+      <span id="se_encoding_toggle" data-tip="Change only if characters are broken. Default is your OS encoding" onclick="_toggleEncodingRow()">▸ Encoding</span>
+    </div>
+    <div class="sp-row" id="se_encoding_row" style="display:none">
+      <label data-tip="Encoding of the text. Default is 1 (OS default, as far as I understand). Change only if special characters appear broken. For values to change from, look at ASS style documentation.">Encoding</label>
+      <input type="number" id="se_encoding" min="0" max="255">
+    </div>
 
     <!-- Outline -->
     <div class="sp-section">Outline</div>
@@ -245,7 +276,6 @@
 <script src="{{ url_for('static', filename='js/style.js') }}"></script>
 <script src="{{ url_for('static', filename='js/video.js') }}"></script>
 <script src="{{ url_for('static', filename='js/lyrics.js') }}"></script>
-<script src="{{ url_for('static', filename='js/export.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

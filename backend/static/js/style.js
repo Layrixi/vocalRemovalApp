@@ -13,7 +13,7 @@ const _OVERLAY_POS = {
 };
 
 
-
+//applies style to lines shown on the overlay
 function applyStyleToOverlay(style) {
   const elem      = overlayText;
   const overlay = document.querySelector('.video-lyrics-overlay');
@@ -26,7 +26,14 @@ function applyStyleToOverlay(style) {
   elem.style.color            = style.font_color;
   elem.style.webkitTextStroke = style.outline_width > 0
     ? `${style.outline_width}px ${style.outline_color}` : '0';
-
+  elem.style.fontWeight      = style.bold ? 'bold' : 'normal';
+  elem.style.fontStyle       = style.italic ? 'italic' : 'normal';
+  elem.style.textDecoration  = [
+    style.underline ? 'underline' : '',
+    style.strikeout ? 'line-through' : ''
+  ].filter(s => s).join(' ');
+  elem.style.letterSpacing   = style.letter_spacing + 'px';
+  elem.style.transform       = `rotate(${style.angle}deg)`;
   if (style.box) {
     elem.style.backgroundColor = style.box_color;
     elem.style.padding         = style.box_padding + 'px';
@@ -69,6 +76,16 @@ function openStyleEditor(idx) {
   _setField('se_font_file',   s.font_file || '');
   _setField('se_font_size',   s.font_size);
   _setColor('se_font_color',  s.font_color);
+  _setCheck('se_bold',        s.bold);
+  _setCheck('se_italic',      s.italic);
+  _setCheck('se_underline',   s.underline);
+  _setCheck('se_strikeout',   s.strikeout);
+  _setField('se_letter_spacing', s.letter_spacing);
+  _setField('se_angle',       s.angle);
+  _setField('se_encoding',    s.encoding);
+  const nonDefaultEncoding = s.encoding !== 1;
+  _toggleSection('se_encoding_row', nonDefaultEncoding);
+  document.getElementById('se_encoding_toggle').textContent = nonDefaultEncoding ? '▾ Advanced' : '▸ Advanced';
 
   _setField('se_outline_width', s.outline_width);
   _setColor('se_outline_color', s.outline_color);
@@ -150,6 +167,14 @@ function _toggleSection(sectionId, visible) {
   if (elem) elem.style.display = visible ? '' : 'none';
 }
 
+function _toggleEncodingRow() {
+  const row    = document.getElementById('se_encoding_row');
+  const toggle = document.getElementById('se_encoding_toggle');
+  const visible = row.style.display === 'none';
+  row.style.display    = visible ? '' : 'none';
+  toggle.textContent   = visible ? '▾ Advanced' : '▸ Advanced';
+}
+
 // ── Write inputs → state ──────────────────────────────────────────────────────
 
 function _commitStyle() {
@@ -174,6 +199,7 @@ function _commitStyle() {
 
   s.horizontal_position = document.getElementById('se_horizontal_position').value;
   s.vertical_position   = document.getElementById('se_vertical_position').value;
+  s.encoding = parseInt(document.getElementById('se_encoding').value) || 1;
 
   // Live-preview on the overlay if this line is currently displayed
   const t = video.currentTime;
