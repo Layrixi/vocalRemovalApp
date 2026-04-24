@@ -21,6 +21,7 @@ let DEFAULT_STYLE = {
   //those two accept only -1 or 0 at the backend. -1=True, 0=False
   underline:           false,
   strikeout:           false,
+  // _____________
   letter_spacing:      0, //px
   angle:               0, //degrees
   encoding:            1,   // ASS encoding value; 1 = OS default (most cases UTF-8)

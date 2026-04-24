@@ -40,6 +40,18 @@ function loadVideo(file) {
       // re-fetch wrap config now that the server has the real video dimensions
       return fetchWrapConfig();
     })
+    .then(() => {
+      // Re-wrap all lines now that we have accurate video dimensions
+      if (state.lines.length > 0) {
+        Promise.all(
+          state.lines.map(line =>
+            wrapTextLine(line.text, line.style.font_size).then(lines => {
+              if (lines) line.wrappedText = lines;
+            })
+          )
+        );
+      }
+    })
     .catch(() => showPopUp('Server upload failed'));
 }
 
@@ -143,8 +155,8 @@ function updateOverlayAndHighlight() {
     .sort((a, b) => b.timestamp - a.timestamp);
 
   if (synced.length > 0) {
-    // show the line on the video overlay, wrapped to match TextBurner output
-    overlayText.innerHTML = wrapText(synced[0].text, synced[0].style?.font_size).map(escHtml).join('<br>');
+    // show the line on the video overlay, wrapped to match TextBurner output|| with fallback to raw unwrapped text in case there's no already wrapped text (shouldn't happen)
+    overlayText.innerHTML = (synced[0].wrappedText ?? [synced[0].text]).map(escHtml).join('<br>');
     overlayText.classList.add('visible');
     // apply this line's per-line style
     if (synced[0].style) applyStyleToOverlay(synced[0].style);

@@ -347,22 +347,21 @@
    transform: translateX(-50%);
    text-align: center;
    pointer-events: none;
-   width: 90%;
    display: flex;
    justify-content: center;
  }
 
  .overlay-text {
-   font-size: clamp(14px, 2.5vw, 22px); /* overridden by applyStyleToOverlay when a line is active */
+  /* overridden by applyStyleToOverlay when a line is active */
+   font-size: clamp(14px, 2.5vw, 22px); 
    font-weight: 800;
    letter-spacing: 0.04em;
    opacity: 0;
+   /*_______________________*/
    transition: opacity 0.2s;
    border-radius: 3px;
    display: block;
-   /* breaks super long words, rest is handled by js */
-   overflow-wrap: break-word;
-   word-break: break-word;
+   white-space: nowrap; 
  }
 
  .overlay-text.visible { opacity: 1; }

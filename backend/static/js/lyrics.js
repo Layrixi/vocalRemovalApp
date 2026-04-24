@@ -24,7 +24,7 @@ document.getElementById('clearLyricsBtn').addEventListener('click', () => {
 });
 
 // splits the text by newlines into plain lyric lines.
-function parseAndRenderLyrics() {
+async function parseAndRenderLyrics() {
   const raw = lyricsRaw.value.trim();
   if (!raw) return;
 
@@ -32,6 +32,15 @@ function parseAndRenderLyrics() {
     .map(l => l.trim())
     .filter(l => l.length > 0)
     .map(l => ({ text: l, timestamp: null, style: { ...DEFAULT_STYLE } }));
+
+  // Wait for backend-accurate wrap before rendering so overlay is correct from the start
+  await Promise.all(
+    state.lines.map(line =>
+      wrapTextLine(line.text, line.style.font_size).then(lines => {
+        if (lines) line.wrappedText = lines;
+      })
+    )
+  );
 
   renderLyricsList();
   renderMarkers();

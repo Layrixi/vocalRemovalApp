@@ -185,6 +185,20 @@ def get_wrap_config():
     })
 
 
+@app.route('/api/wrap-text', methods=['POST'])
+def wrap_text_route():
+    """Wrap a single text string using backend logic and return an array of lines."""
+    data = request.get_json()
+    if not data or 'text' not in data:
+        return jsonify({'error': 'text required'}), 400
+    text = str(data['text'])
+    font_size = int(data.get('font_size', TextStyle().font_size))
+    video_w, _ = get_video_dimensions()
+    burner = TextBurner()
+    wrapped = burner._wrap_text(text, font_size, video_w)
+    return jsonify({'lines': wrapped.split('\\N')})
+
+
 if __name__ == '__main__':
     # debug=false in prod later, change the port adequatly to the pc(if possible)
     # use_reloader=False prevents WinError 10038 (socket inheritance issue on Windows)

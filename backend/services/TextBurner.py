@@ -192,11 +192,10 @@ class TextBurner:
 
     def _wrap_text(self, text: str, font_size: int, play_res_x: int) -> str:
         """Pre-wrap text using \\N (ASS hard break) so long words don't overflow the frame."""
-        #not using * 0.9 like in the frontend, because it works correctly without it
         usable_px      = play_res_x
         chars_per_line = max(1, int(usable_px / (font_size * get_char_width_ratio())))
 
-        # split overlong words first
+        # split over long words first
         words = []
         for word in text.split():
             while len(word) > chars_per_line:
@@ -205,7 +204,6 @@ class TextBurner:
             if word:
                 words.append(word)
 
-        # build lines manually word-by-word, mirroring the JS wrapText logic
         lines = []
         current = ""
         for word in words:
@@ -285,7 +283,7 @@ class TextBurner:
             back_color    = self._color_to_ass(style.shadow_color) if style.shadow else "&HFF000000"
 
         alignment = self._position_to_alignment(style.horizontal_position, style.vertical_position)
-        font_name = pathlib.Path(style.font_file).stem if style.font_file else "Comic Sans MS"
+        font_name = pathlib.Path(style.font_file).stem if style.font_file else "Arial"
 
         fields = [
             style_name, font_name, str(style.font_size),

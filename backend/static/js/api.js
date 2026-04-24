@@ -1,17 +1,20 @@
-﻿// -- WRAP CONFIG --
+﻿// --  CONFIG --
 
-// Fetch TextBurner wrap constants from the server and cache them in state.
-async function fetchWrapConfig() {
+// Calls backend text wrapping method and returns an array of wrapped lines, or null on failure.
+async function wrapTextLine(text, fontSize) {
   try {
-    const res = await fetch('/api/wrap-config');
-    if (!res.ok) return;
+    const res = await fetch('/api/wrap-text', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, font_size: fontSize }),
+    });
+    if (!res.ok) return null;
     const data = await res.json();
-    state.wrapConfig = { ...state.wrapConfig, ...data };
+    return data.lines ?? null;
   } catch (_) {
-    // keep state defaults on failure
+    return null;
   }
 }
-fetchWrapConfig();
 
 
 // -- VOCAL REMOVAL API --

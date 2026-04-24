@@ -13,27 +13,30 @@ const _OVERLAY_POS = {
 };
 
 
-//applies style to lines shown on the overlay
+//applies style to line shown on the overlay
 function applyStyleToOverlay(style) {
   const elem      = overlayText;
   const overlay = document.querySelector('.video-lyrics-overlay');
 
   const fontName = style.font_file
     ? style.font_file.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '')
-    : 'Comic Sans MS';
+    : 'Arial';
 
   elem.style.fontFamily       = `"${fontName}", sans-serif`;
   elem.style.color            = style.font_color;
   elem.style.webkitTextStroke = style.outline_width > 0
     ? `${style.outline_width}px ${style.outline_color}` : '0';
+
   elem.style.fontWeight      = style.bold ? 'bold' : 'normal';
   elem.style.fontStyle       = style.italic ? 'italic' : 'normal';
   elem.style.textDecoration  = [
     style.underline ? 'underline' : '',
     style.strikeout ? 'line-through' : ''
   ].filter(s => s).join(' ');
+  elem.style.textDecorationColor = style.font_color;
   elem.style.letterSpacing   = style.letter_spacing + 'px';
   elem.style.transform       = `rotate(${style.angle}deg)`;
+
   if (style.box) {
     elem.style.backgroundColor = style.box_color;
     elem.style.padding         = style.box_padding + 'px';
@@ -183,8 +186,17 @@ function _commitStyle() {
 
   const fontFileVal = document.getElementById('se_font_file').value.trim();
   s.font_file   = fontFileVal || null;
+  const prevFontSize = s.font_size;
   s.font_size   = parseInt(document.getElementById('se_font_size').value)   || 64;
   s.font_color  = _readColor('se_font_color');
+  s.bold        = document.getElementById('se_bold').checked;
+  s.italic      = document.getElementById('se_italic').checked;
+  s.underline   = document.getElementById('se_underline').checked;
+  s.strikeout   = document.getElementById('se_strikeout').checked;
+
+  s.letter_spacing = parseInt(document.getElementById('se_letter_spacing').value) || 0;
+  s.angle       = parseInt(document.getElementById('se_angle').value) || 0;
+  s.encoding    = parseInt(document.getElementById('se_encoding').value) || 1;
 
   s.outline_width = parseInt(document.getElementById('se_outline_width').value) || 0;
   s.outline_color = _readColor('se_outline_color');
@@ -200,6 +212,13 @@ function _commitStyle() {
   s.horizontal_position = document.getElementById('se_horizontal_position').value;
   s.vertical_position   = document.getElementById('se_vertical_position').value;
   s.encoding = parseInt(document.getElementById('se_encoding').value) || 1;
+
+  // Only re-wrap if font_size changed, take care of letter spacing and (optional)angle changes as well in the future
+  if (s.font_size !== prevFontSize) {
+    wrapTextLine(state.lines[_editingIdx].text, s.font_size).then(lines => {
+      if (lines) state.lines[_editingIdx].wrappedText = lines;
+    });
+  }
 
   // Live-preview on the overlay if this line is currently displayed
   const t = video.currentTime;
@@ -218,8 +237,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('se_reset').addEventListener('click', () => {
     if (_editingIdx === null) return;
+    const prevFontSize = state.lines[_editingIdx].style.font_size;
     state.lines[_editingIdx].style = { ...DEFAULT_STYLE };
     openStyleEditor(_editingIdx);
+    if (DEFAULT_STYLE.font_size !== prevFontSize) {
+      const line = state.lines[_editingIdx];
+      wrapTextLine(line.text, line.style.font_size).then(lines => {
+        if (lines) line.wrappedText = lines;
+      });
+    }
   });
 
   document.getElementById('se_apply_all').addEventListener('click', () => {
@@ -227,6 +253,16 @@ document.addEventListener('DOMContentLoaded', () => {
     _commitStyle();
     const src = state.lines[_editingIdx].style;
     state.lines.forEach((l, i) => { if (i !== _editingIdx) l.style = { ...src }; });
+    // Only re-wrap lines whose font_size changed
+    Promise.all(
+      state.lines
+        .filter(line => line.style.font_size !== src.font_size || !line.wrappedText)
+        .map(line =>
+          wrapTextLine(line.text, line.style.font_size).then(lines => {
+            if (lines) line.wrappedText = lines;
+          })
+        )
+    );
     showPopUp('Style applied to all lines');
   });
 
