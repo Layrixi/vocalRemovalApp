@@ -1,17 +1,13 @@
 actual todo:
 - make the preview more similiar (outline, bg box and shadow)
 - error handling(few error handlers implemented, they raise but not handled on the front-end)
-- make user able to use generated audio with removed vocals
-- make it possible to render the final video
-    here, send json from front to backend with synchronized lines list, handle the synchro text adding in the backend and render
 - make it possible to scale the time bar
 - apply karaoke format of ASS or make my own (depend on the ASS version)
 - handle SRT and LRC formats
-- (basically save progress) at the init, load the data from uploads so the user can work with the last used video if not finished working on it.
+- (save progress) at the init, load the data from uploads so the user can work with the last used video if not finished working on it.
 - after the above, add a cleanup button so user can work on a new file.
 - add feature to unselect line when mouse click anywhere else than the timeline
 - make timestamped lines more readable. For example when the mouse hover's over the timestamp, it then shows the text instead of simply showing it right now coz it can make a mess with fast changing texts.
-- make it possible to edit the text on the text list after it's been parsed
 - make it possible to render 2 lines at the same time, rap songs or other fast ones case
 - make it possible to switch between instrumental and vocal version of audio
 - add fonts so ffmpeg gets more fonts to choose from
@@ -26,4 +22,3 @@ tests:
 after everything's ready:
 - set debug=false
 - adapt port to the available choices
-- _build_drawtext_filter may generate a bug, described in the comment
