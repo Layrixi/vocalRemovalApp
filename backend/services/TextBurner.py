@@ -62,7 +62,7 @@ class TextStyle:
     italic:       bool          = False
     underline:    bool          = False
     strikeout:    bool          = False
-    line_spacing: int           = 0
+    letter_spacing: int           = 0
     angle:        int           = 0
  
     # ── Background box
@@ -297,7 +297,7 @@ class TextBurner:
             #apply hardcoded later
             str(int(style.bold)), str(int(style.italic)), str(-int(style.underline)), str(-int(style.strikeout)), #bold (0,1), italic(0,1), underline(0,-1),strikeout(0,-1) 
             "100", "100",          # ScaleX, ScaleY
-            str(style.line_spacing),                   # Letter Spacing
+            str(style.letter_spacing),                   # Letter Spacing
             str((360-style.angle) % 360),       # Angle, -360- to match css view
             str(border_style), str(outline), str(shadow),
             str(alignment),
