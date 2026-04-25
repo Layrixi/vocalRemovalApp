@@ -58,6 +58,12 @@ class TextStyle:
     font_file:    Optional[str] = None         
     font_size:    int           = 64
     font_color:   str           = "#FFFFFFFF"
+    bold:         bool          = False
+    italic:       bool          = False
+    underline:    bool          = False
+    strikeout:    bool          = False
+    line_spacing: int           = 0
+    angle:        int           = 0
  
     # ── Background box
     box:          bool          = False
@@ -284,15 +290,15 @@ class TextBurner:
 
         alignment = self._position_to_alignment(style.horizontal_position, style.vertical_position)
         font_name = pathlib.Path(style.font_file).stem if style.font_file else "Arial"
-
+        
         fields = [
             style_name, font_name, str(style.font_size),
             primary_color, secondary_color, outline_color, back_color,
             #apply hardcoded later
-            "0", "0", "0", "0",   # Bold, Italic, Underline, StrikeOut
+            str(int(style.bold)), str(int(style.italic)), str(-int(style.underline)), str(-int(style.strikeout)), #bold (0,1), italic(0,1), underline(0,-1),strikeout(0,-1) 
             "100", "100",          # ScaleX, ScaleY
-            "0",                   # Spacing (letter spacing; line_spacing has no direct ASS equivalent)
-            "0",                   # Angle
+            str(style.line_spacing),                   # Letter Spacing
+            str((360-style.angle) % 360),       # Angle, -360- to match css view
             str(border_style), str(outline), str(shadow),
             str(alignment),
             "10", "10", str(int(height * 0.14)) if style.vertical_position in ("top", "bottom") else "0",  # MarginL, MarginR, MarginV
