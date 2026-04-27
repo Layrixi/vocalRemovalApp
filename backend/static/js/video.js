@@ -18,6 +18,7 @@ videoDropZone.addEventListener('drop', e => {
   if (f && f.type.startsWith('video/')) loadVideo(f);
 });
 
+// Loads the video file into the player and sends it to the backend
 function loadVideo(file) {
   const url = URL.createObjectURL(file);
   video.src = url;
@@ -32,27 +33,27 @@ function loadVideo(file) {
     showPopUp('Video loaded — ' + formatTime(video.duration));
   }, { once: true });
 
-  // Upload to server so vocal removal can access it
   state.uploadedVideoFilename = null;
   uploadVideo(file)
+    .catch(() => { showPopUp('Server upload failed'); return null; })
     .then(filename => {
+      if (!filename) return null;
       state.uploadedVideoFilename = filename;
-      // re-fetch wrap config now that the server has the real video dimensions
-      return fetchWrapConfig();
-    })
-    .then(() => {
+      showPopUp('Video uploaded to server');})
+    .then(result => {
+      if (result === null) return;
       // Re-wrap all lines now that we have accurate video dimensions
       if (state.lines.length > 0) {
-        Promise.all(
+        return Promise.all(
           state.lines.map(line =>
-            wrapTextLine(line.text, line.style.font_size).then(lines => {
-              if (lines) line.wrappedText = lines;
-            })
+            wrapTextLine(line.text, line.style.font_size)
+              .then(lines => { if (lines) line.wrappedText = lines; })
+              .catch(() => { showPopUp('Failed to wrap text'); })
           )
         );
       }
-    })
-    .catch(() => showPopUp('Server upload failed'));
+    });
+    return null;
 }
 
 //  TIMELINE INTERACTION 
