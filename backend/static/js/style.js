@@ -252,11 +252,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (_editingIdx === null) return;
     _commitStyle();
     const src = state.lines[_editingIdx].style;
+    const linesToWrap = state.lines.filter((l, i) =>
+      i !== _editingIdx && (l.style.font_size !== src.font_size || !l.wrappedText)
+    );
     state.lines.forEach((l, i) => { if (i !== _editingIdx) l.style = { ...src }; });
     // Only re-wrap lines whose font_size changed
     Promise.all(
-      state.lines
-        .filter(line => line.style.font_size !== src.font_size || !line.wrappedText)
+      linesToWrap
         .map(line =>
           wrapTextLine(line.text, line.style.font_size).then(lines => {
             if (lines) line.wrappedText = lines;
