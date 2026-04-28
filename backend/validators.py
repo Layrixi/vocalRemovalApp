@@ -4,6 +4,9 @@ Each function returns an error string on failure, or None on success.
 """
 
 
+import math
+
+
 def validate_font_file(value) -> str | None:
     if value is not None and not isinstance(value, str):
         return 'font_file must be a string'
@@ -30,9 +33,11 @@ def validate_letter_spacing(value) -> str | None:
 
 def validate_angle(value) -> str | None:
     try:
-        float(value)
+        parsed = float(value)
     except (ValueError, TypeError):
         return 'angle must be a number'
+    if not math.isfinite(parsed):
+        return 'angle must be a finite number'
     return None
 
 
