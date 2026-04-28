@@ -65,6 +65,9 @@ def validate_shadow_offset(value) -> str | None:
 
 def validate_style(style: dict) -> str | None:
     """Returns an error message if the style dict contains invalid values, else None."""
+    if not isinstance(style, dict):
+        return 'style must be an object'
+    
     if 'font_file' in style:
         if err := validate_font_file(style['font_file']):
             return err
