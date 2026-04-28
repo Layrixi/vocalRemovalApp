@@ -24,7 +24,7 @@ def validate_letter_spacing(value) -> str | None:
         if not 0 <= int(value) <= 100:
             raise ValueError()
     except (ValueError, TypeError):
-        return 'letter_spacing must be an integer in range 0–100'
+        return 'letter_spacing must be an integer in range 0-100'
     return None
 
 
@@ -41,7 +41,7 @@ def validate_outline_width(value) -> str | None:
         if not 0 <= int(value) <= 4:
             raise ValueError()
     except (ValueError, TypeError):
-        return 'outline_width must be an integer in range 0–4'
+        return 'outline_width must be an integer in range 0-4'
     return None
 
 
@@ -50,7 +50,7 @@ def validate_box_padding(value) -> str | None:
         if not 1 <= int(value) <= 100:
             raise ValueError()
     except (ValueError, TypeError):
-        return 'box_padding must be an integer in range 1–100'
+        return 'box_padding must be an integer in range 1-100'
     return None
 
 
@@ -59,7 +59,7 @@ def validate_shadow_offset(value) -> str | None:
         if not 0 <= int(value) <= 4:
             raise ValueError()
     except (ValueError, TypeError):
-        return 'shadow_offset must be an integer in range 0–4'
+        return 'shadow_offset must be an integer in range 0-4'
     return None
 
 
