@@ -219,18 +219,10 @@ function _commitStyle() {
     wrapTextLine(state.lines[_editingIdx].text, s).then(lines => {
       if (lines && lines.length > 0) {
         state.lines[_editingIdx].wrappedText = lines;
-        updateOverlayAndHighlight();
       }
+      updateOverlayAndHighlight();
     });
-  }
-
-  // Live-preview on the overlay if this line is currently displayed
-  const t = video.currentTime;
-  const active = state.lines
-    .filter(l => l.timestamp !== null && l.timestamp <= t)
-    .sort((a, b) => b.timestamp - a.timestamp)[0];
-  if (active && state.lines.indexOf(active) === _editingIdx) {
-    // call this instead of applyStyleToOverlay so the overlay content updates as well if this line is currently active
+  } else {
     updateOverlayAndHighlight();
   }
 }
@@ -249,7 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const line = state.lines[_editingIdx];
       wrapTextLine(line.text, line.style).then(lines => {
         if (lines) line.wrappedText = lines;
+        updateOverlayAndHighlight();
       });
+    } else {
+      updateOverlayAndHighlight();
     }
   });
 
@@ -266,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .map(line =>
           wrapTextLine(line.text, line.style).then(lines => {
             if (lines) line.wrappedText = lines;
-          })
+          }).then(() => updateOverlayAndHighlight())
         )
     );
     showPopUp('Style applied to all lines');
