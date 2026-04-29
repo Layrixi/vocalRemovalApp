@@ -50,3 +50,7 @@ backend/uploads/**
 !backend/uploads/video/
 !backend/uploads/output/
 !backend/uploads/**/.gitkeep
+
+# test files
+
+tests/
