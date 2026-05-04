@@ -14,16 +14,20 @@ const _OVERLAY_POS = {
 
 
 //applies style to line shown on the overlay
-function applyStyleToOverlay(style) {
+async function applyStyleToOverlay(style) {
   const elem      = overlayText;
   const overlay = document.querySelector('.video-lyrics-overlay');
 
-  
-  const fontName = style.font_file
-    ? style.font_file.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '')
+  const fontFile = style.font_file || state.availableFonts[0] || null;
+  const fontName = fontFile
+    ? fontFile.split('/').pop().replace(/\.[^.]+$/, '')  // strip dir prefix and extension
     : 'Arial';
 
-  //scale appropriate style values
+  if (fontFile) {
+    await loadFont(fontName, fontFile);
+  }
+
+  //scale appropriate style values (matches backend scaling logic)
   scaleCss = (video.clientHeight || 360) / (state.wrapConfig.play_res_y);
   elem.style.fontSize = (style.font_size * scaleCss) + 'px';
   elem.style.webkitTextStroke = style.outline_width > 0
@@ -55,9 +59,6 @@ function applyStyleToOverlay(style) {
 
   elem.style.textAlign = style.horizontal_position;
 
-  // Scale font size
-
-
   // Reposition overlay container
   if (overlay) {
     const pos = _OVERLAY_POS[style.vertical_position] || _OVERLAY_POS.bottom;
@@ -79,7 +80,7 @@ function openStyleEditor(idx) {
     `Line ${idx + 1} · "${state.lines[idx].text.slice(0, 36)}${state.lines[idx].text.length > 36 ? '…' : ''}"`;
 
   // Populate every field from the line's style
-  _setField('se_font_file',   s.font_file || '');
+  _setField('se_font_file',   s.font_file || state.availableFonts[0] || '');//may need refactor for readability and scalability, works for now
   _setField('se_font_size',   s.font_size);
   _setColor('se_font_color',  s.font_color);
   _setCheck('se_bold',        s.bold);
@@ -230,6 +231,23 @@ function _commitStyle() {
   }
 }
 
+// ── Font list & FontFace loading ──────────────────────────────────────────────
+
+// actually loads the font to be usable in the page.
+async function loadFont(fontName, filename) {
+  if (state.loadedFonts.has(fontName)) return;
+  try {
+    const encodedPath = filename.split('/').map(encodeURIComponent).join('/');
+    const face = new FontFace(fontName, `url(/static/fonts/${encodedPath})`);
+    await face.load();
+    document.fonts.add(face);
+    state.loadedFonts.add(fontName);
+  } catch (e) {
+    console.warn(`Could not load font "${fontName}":`, e);
+  }
+}
+
+fetchFontList();
 
 // ── Wire up inputs ────────────────────────────────────────────────────────────
 

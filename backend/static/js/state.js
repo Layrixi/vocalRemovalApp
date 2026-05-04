@@ -3,7 +3,7 @@
 // Mirrors Python's TextStyle dataclass defaults.
 // Overwritten on load by /api/style/default — kept here as safe fallback.
 let DEFAULT_STYLE = {
-  font_file:           null,
+  font_file:           null, // is being set later 
   font_size:           64,
   font_color:          '#FFFFFFFF',
   box:                 false,
@@ -38,6 +38,8 @@ const state = {
   speeds: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
   speedIdx: 3,
   wrapConfig: { font_size: 64, char_width_ratio: 0.5, play_res_x: 1920, play_res_y: 1080 , videoW: 1920, videoH: 1080},
+  availableFonts: [],   // populated by fetchFontList() from /api/fonts, responsible for keeping font names
+  loadedFonts: new Set(), // fonts fetched and registered via FontFace API
 };
 
 //  ELEMENTS 
