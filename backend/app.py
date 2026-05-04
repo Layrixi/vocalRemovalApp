@@ -14,11 +14,13 @@ sys.path.append(str(pathlib.Path(__file__).parent))
 from config import PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
-from validators import validate_style, validate_font_size
+from validators import validate_style
+from api_helpers import resolve_font, get_first_font_file
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
 OUTPUT_DIR       = pathlib.Path(__file__).parent / "uploads" / "output"
+FONTS_DIR        = pathlib.Path(__file__).parent / "static" / "fonts"
 
 app = Flask(__name__)
 
@@ -127,7 +129,6 @@ def download_file(filename):
     safe_name = secure_filename(filename)
     return send_from_directory(str(OUTPUT_DIR), safe_name, as_attachment=True)
 
-
 # POST { filename, lines: [{text, timestamp}, …] }
 # Passes the video to the burn function, which burns the text into the video 
 # with user-provided style or default one
@@ -157,22 +158,31 @@ def render_video():
             err = validate_style(style)
             if err:
                 return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
+        if style['font_file']:
+            style['font_file'] = get_first_font_file(FONTS_DIR)
 
     #text preparation
-    text_segments = [
-        # for every line unpack the text, timestamp and style (if it exists) into a TextSegment dataclass
-        TextSegment(
-            text=line['text'],
-            start_time=float(line['timestamp']),
-            end_time=float(lines[i + 1]['timestamp']) if i + 1 < len(lines) else None,
-            style=TextStyle(**{k: v for k, v in line.get('style', {}).items() if hasattr(TextStyle, k)}),
-        )
-        for i, line in enumerate(lines)
-    ]
+    try:
+        text_segments = [
+            # for every line unpack the text, timestamp and style (if it exists) into a TextSegment dataclass
+            TextSegment(
+                text=line['text'],
+                start_time=float(line['timestamp']),
+                end_time=float(lines[i + 1]['timestamp']) if i + 1 < len(lines) else None,
+                style=TextStyle(**{
+                    k: (str(resolve_font(v, FONTS_DIR)) if k == 'font_file' and v else v)
+                    for k, v in line.get('style', {}).items()
+                    if hasattr(TextStyle, k)
+                }),
+            )
+            for i, line in enumerate(lines)
+        ]
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     output_filename = f"{video_path.stem}_karaoke.mp4"
     output_path = OUTPUT_DIR / output_filename
     try:
-        renderer = TextBurner(ffmpeg_path="ffmpeg")  # May add adjusting path if ffmpeg is not in system PATH, but it's in the readme so may not as well
+        renderer = TextBurner(ffmpeg_path="ffmpeg")  # May add adjusting path if ffmpeg is not in system PATH, or install it locally later when unpacking the app
         renderer.burn(video_path=video_path, output_path=output_path, lines=text_segments)
     except Exception as e:
         return jsonify({'error': f'Video rendering failed: {e}'}), 500
@@ -215,6 +225,12 @@ def wrap_text_route():
         return jsonify({'error': 'text is empty'}), 400
     return jsonify({'lines': lines})
 
+
+@app.route('/api/fonts', methods=['GET'])
+def get_fonts():
+    """Return the relative paths of all font files available in the fonts directory."""
+    fonts = sorted(f.relative_to(FONTS_DIR).as_posix() for f in FONTS_DIR.rglob('*.ttf'))
+    return jsonify({'fonts': fonts})
 
 if __name__ == '__main__':
     # debug=false in prod later, change the port adequatly to the pc(if possible)
