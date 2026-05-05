@@ -19,6 +19,7 @@ actual todo:
 - build own removal model
 - bug: line displaying dynamic scaling acts weird when the window is getting too small (like phone size)
 - uploads stay in the "cache".
+- consider variable fonts, but I don't think it's something worth spending time and adjusting the app to.
 - !may not be a problem; If video gets deleted, it stays in the cache
     Generates problem with vocal removal - file not found. Add a fix that gets the video again from the cache.
 
