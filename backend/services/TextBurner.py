@@ -55,7 +55,7 @@ class TextStyle:
     """
     
     # ── Typography
-    font_file:    Optional[str] = None         
+    font_file:    str           = None         
     font_size:    int           = 64
     font_color:   str           = "#FFFFFFFF"
     bold:         bool          = False
@@ -179,7 +179,22 @@ class TextBurner:
                     self._build_ass_content(lines, PLAY_RES_X, PLAY_RES_Y), encoding="utf-8"
                 )
 
-                filter_str = f"subtitles='{self._escape_ass_path(ass_file)}'"
+                # Copy any custom font files into the temp dir so libass can find them
+                # via a single fontsdir= path on the subtitles filter.
+                unique_fonts = {
+                    pathlib.Path(line.style.font_file)
+                    for line in lines
+                    if line.style.font_file
+                }
+                for font_path in unique_fonts:
+                    font_path = pathlib.Path(font_path)
+                    # validate font here
+                    if font_path.is_file():
+                        shutil.copy2(font_path, temp_dir_path / font_path.name)
+
+                escaped_ass  = self._escape_ass_path(ass_file)
+                escaped_fonts = self._escape_ass_path(temp_dir_path)
+                filter_str = f"subtitles='{escaped_ass}':fontsdir='{escaped_fonts}'"
 
                 self._run_ffmpeg([
                     self.ffmpeg_path, '-y',

@@ -158,8 +158,8 @@ def render_video():
             err = validate_style(style)
             if err:
                 return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
-        if style['font_file']:
-            style['font_file'] = get_first_font_file(FONTS_DIR)
+        if not style.get('font_file'):
+                style['font_file'] = get_first_font_file(FONTS_DIR)
 
     #text preparation
     try:
