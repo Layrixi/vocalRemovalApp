@@ -6,6 +6,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Optional
 import shutil
+from fontTools import ttLib
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from config import VIDEO_W,PLAY_RES_X, PLAY_RES_Y, set_video_duration, get_video_duration, set_video_dimensions, get_video_dimensions, get_char_width_ratio
 
@@ -213,6 +214,18 @@ class TextBurner:
 
     # Private helpers
 
+    def _get_proper_font_name(self, font_file: str) -> str:
+        """Read the internal full name (nameID 4) from a font file so libass can match it.
+        Falls back to the file stem if the name table can't be read."""
+        try:
+            tt = ttLib.TTFont(font_file)
+            for record in tt['name'].names:
+                if record.nameID == 4:
+                    return record.toUnicode()
+        except Exception:
+            pass
+        return pathlib.Path(font_file).stem
+
     def _run_ffmpeg(self, cmd: list[str], verbose: bool):
         if verbose:
             print("Running:", " ".join(cmd))
@@ -330,7 +343,7 @@ class TextBurner:
             back_color    = self._color_to_ass(style.shadow_color) if style.shadow else "&HFF000000"
 
         alignment = self._position_to_alignment(style.horizontal_position, style.vertical_position)
-        font_name = pathlib.Path(style.font_file).stem if style.font_file else "Arial"
+        font_name = self._get_proper_font_name(style.font_file) if style.font_file else "Arial"
         
         fields = [
             style_name, font_name, str(style.font_size),
