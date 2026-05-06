@@ -32,6 +32,7 @@ async function applyStyleToOverlay(style) {
   elem.style.fontSize = (style.font_size * scaleCss) + 'px';
   elem.style.webkitTextStroke = style.outline_width > 0
     ? `${style.outline_width * scaleCss}px ${style.outline_color}` : '0';
+  elem.style.paintOrder = 'stroke fill';
   elem.style.letterSpacing   = (style.letter_spacing * scaleCss) + 'px';
   elem.style.textShadow = style.shadow
     ? `${style.shadow_offset * scaleCss}px ${style.shadow_offset * scaleCss}px 0 ${_hex8ToCssColor(style.shadow_color)}`
