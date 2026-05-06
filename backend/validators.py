@@ -5,11 +5,21 @@ Each function returns an error string on failure, or None on success.
 
 
 import math
-
-
+from api_helpers import get_available_fonts_list
+from config import FONTS_DIR
+#to redo fontfile validation
 def validate_font_file(value) -> str | None:
-    if value is not None and not isinstance(value, str):
-        return 'font_file must be a string'
+    if value is None:
+        return None
+    try:
+        if not isinstance(value, str):
+            raise TypeError()
+        if value not in get_available_fonts_list(FONTS_DIR, relative_only=True):
+            raise ValueError()
+    except(ValueError):
+        return 'Font file not found in fonts directory.'
+    except(TypeError):
+        return 'Font file must be a string.'
     return None
 
 
@@ -73,7 +83,11 @@ def validate_style(style: dict) -> str | None:
     if not isinstance(style, dict):
         return 'style must be an object'
     
-    if 'font_file' in style:
+    if not style.get('font_file'):
+        available = get_available_fonts_list(FONTS_DIR, relative_only=True)
+        style['font_file'] = available[0]
+        print(f'[WARNING] No font_file passed, defaulting to: {style["font_file"]}')
+    else:
         if err := validate_font_file(style['font_file']):
             return err
 
@@ -106,3 +120,6 @@ def validate_style(style: dict) -> str | None:
             return err
 
     return None
+
+if __name__ == '__main__':
+    print("testing here")
