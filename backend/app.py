@@ -11,16 +11,15 @@ import soundfile as sf
 from werkzeug.utils import secure_filename
 import sys
 sys.path.append(str(pathlib.Path(__file__).parent))
-from config import PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+from config import FONTS_DIR, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from validators import validate_style
-from api_helpers import resolve_font, get_first_font_file
+from api_helpers import resolve_font, get_available_fonts_list, get_first_font_file
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
 OUTPUT_DIR       = pathlib.Path(__file__).parent / "uploads" / "output"
-FONTS_DIR        = pathlib.Path(__file__).parent / "static" / "fonts"
 
 app = Flask(__name__)
 
@@ -159,7 +158,7 @@ def render_video():
             if err:
                 return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
         if not style.get('font_file'):
-                style['font_file'] = get_first_font_file(FONTS_DIR)
+            style['font_file'] = get_first_font_file(FONTS_DIR)
 
     #text preparation
     try:

@@ -105,6 +105,9 @@ async function fetchFontList() {
     if (!res.ok) return;
     const data = await res.json();
     state.availableFonts = data.fonts;
+    if (data.fonts.length > 0) {
+      DEFAULT_STYLE.font_file = data.fonts[0];
+    }
     const select = document.getElementById('se_font_file');
     data.fonts.forEach(filename => {
       const option = document.createElement('option');

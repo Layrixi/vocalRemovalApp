@@ -3,7 +3,7 @@
 // Mirrors Python's TextStyle dataclass defaults.
 // Overwritten on load by /api/style/default — kept here as safe fallback.
 let DEFAULT_STYLE = {
-  font_file:           null, // is being set later 
+  font_file:           null,
   font_size:           64,
   font_color:          '#FFFFFFFF',
   box:                 false,
