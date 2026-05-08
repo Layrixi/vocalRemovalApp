@@ -17,7 +17,7 @@ def get_first_font_file(fonts_dir: pathlib.Path) -> pathlib.Path | ValueError:
         raise ValueError("INTERNAL APP ERROR: No font files found in the fonts directory.")
     return resolve_font(fonts[0], fonts_dir)
 
-def get_available_fonts_list(fonts_dir: pathlib.Path, relative_only: bool = False) -> list | ValueError:
+def get_available_fonts_list(fonts_dir: pathlib.Path, relative_only: bool = False) -> list[pathlib.Path] | ValueError:
     """Returns a list of available fonts"""
     fonts = sorted(f.relative_to(fonts_dir).as_posix() for f in fonts_dir.rglob('*.ttf'))
     if not fonts:
@@ -28,4 +28,4 @@ def get_available_fonts_list(fonts_dir: pathlib.Path, relative_only: bool = Fals
     for font in fonts:
         resolvedFonts.append(resolve_font(font, fonts_dir))
     return resolvedFonts
- 
+
