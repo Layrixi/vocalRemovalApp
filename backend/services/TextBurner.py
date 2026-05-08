@@ -218,10 +218,14 @@ class TextBurner:
         """Read the internal full name (nameID 4) from a font file so libass can match it.
         Falls back to the file stem if the name table can't be read."""
         try:
-            tt = ttLib.TTFont(font_file)
-            for record in tt['name'].names:
-                if record.nameID == 4:
-                    return record.toUnicode()
+            with ttLib.TTFont(font_file) as tt:
+                for record in tt['name'].names:
+                    if record.nameID == 4 and record.platformID == 3:
+                        return record.toUnicode()
+                # fallback: first nameID 4 record regardless of platform
+                for record in tt['name'].names:
+                    if record.nameID == 4:
+                        return record.toUnicode()
         except Exception:
             pass
         return pathlib.Path(font_file).stem
