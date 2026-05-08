@@ -26,8 +26,8 @@ def get_available_fonts_list(fonts_dir: pathlib.Path, relative_only: bool = Fals
     fonts = _scan_font_files(fonts_dir)
     if relative_only:
         return fonts
-    resolvedFonts = []
+    resolved_Fonts = []
     for font in fonts:
-        resolvedFonts.append(resolve_font(font, fonts_dir))
-    return resolvedFonts
+        resolved_Fonts.append(resolve_font(font, fonts_dir))
+    return resolved_Fonts
 
