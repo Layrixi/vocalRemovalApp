@@ -1,7 +1,11 @@
 import pathlib
 
 def _scan_font_files(fonts_dir: pathlib.Path) -> list[pathlib.Path] | ValueError:
-    fonts = sorted(f.relative_to(fonts_dir).as_posix() for f in fonts_dir.rglob('*.ttf'))
+    fonts = sorted(
+        f.relative_to(fonts_dir).as_posix()
+        for pattern in ('*.ttf', '*.otf')
+        for f in fonts_dir.rglob(pattern)
+    )
     if not fonts:
         raise ValueError("INTERNAL APP ERROR: No font files found in the fonts directory.")
     return fonts
