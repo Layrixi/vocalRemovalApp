@@ -228,7 +228,7 @@ def wrap_text_route():
 @app.route('/api/fonts', methods=['GET'])
 def get_fonts():
     """Return the relative paths of all font files available in the fonts directory."""
-    fonts = sorted(f.relative_to(FONTS_DIR).as_posix() for f in FONTS_DIR.rglob('*.ttf'))
+    fonts = get_available_fonts_list(FONTS_DIR, relative_only=True)
     return jsonify({'fonts': fonts})
 
 if __name__ == '__main__':
