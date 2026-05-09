@@ -20,9 +20,11 @@ def resolve_font(relative: str, fonts_dir: pathlib.Path) -> pathlib.Path | Value
         raise ValueError(f"Font file not found: {relative}")
     return resolved
 
-def get_first_font_file(fonts_dir: pathlib.Path) -> pathlib.Path | ValueError:
+def get_first_font_file(fonts_dir: pathlib.Path, relative_only: bool = False) -> pathlib.Path | ValueError:
     """Get a list of available font files in the 'fonts_dir' directory and return the 1st one in a sorted order."""
     fonts = _scan_font_files(fonts_dir) 
+    if relative_only:
+        return fonts[0]
     return resolve_font(fonts[0], fonts_dir)
 
 def get_available_fonts_list(fonts_dir: pathlib.Path, relative_only: bool = False) -> list[str] | list[pathlib.Path] | ValueError:

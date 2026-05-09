@@ -15,7 +15,7 @@ from config import FONTS_DIR, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_dur
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from validators import validate_style
-from api_helpers import resolve_font, get_available_fonts_list, get_first_font_file
+from api_helpers import resolve_font, get_available_fonts_list
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
@@ -149,16 +149,12 @@ def render_video():
     video_path = UPLOAD_VIDEO_DIR / safe_name
     if not video_path.exists() or not video_path.is_file():
         return jsonify({'error': 'Video file not found'}), 404
-
     #validate input styles before preping it
     for i, line in enumerate(lines):
-        style = line.get('style', {})
-        if style:
-            err = validate_style(style)
-            if err:
-                return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
-        if not style.get('font_file'):
-            style['font_file'] = get_first_font_file(FONTS_DIR)
+        style = line.setdefault('style', {})
+        err = validate_style(style)
+        if err:
+            return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
 
     #text preparation
     try:

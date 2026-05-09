@@ -5,9 +5,9 @@ Each function returns an error string on failure, or None on success.
 
 
 import math
-from api_helpers import get_available_fonts_list
+from api_helpers import get_available_fonts_list, get_first_font_file
 from config import FONTS_DIR
-#to redo fontfile validation
+#to redo add: defaulting the style if value is not passed
 def validate_font_file(value) -> str | None:
     if value is None:
         return None
@@ -84,8 +84,7 @@ def validate_style(style: dict) -> str | None:
         return 'style must be an object'
     
     if not style.get('font_file'):
-        available = get_available_fonts_list(FONTS_DIR, relative_only=True)
-        style['font_file'] = available[0]
+        style['font_file'] = get_first_font_file(FONTS_DIR, relative_only=True)
         print(f'[WARNING] No font_file passed, defaulting to: {style["font_file"]}')
     else:
         if err := validate_font_file(style['font_file']):
