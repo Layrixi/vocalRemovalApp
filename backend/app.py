@@ -12,6 +12,7 @@ from werkzeug.utils import secure_filename
 import sys
 sys.path.append(str(pathlib.Path(__file__).parent))
 from config import FONTS_DIR, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+import dataclasses
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from validators import validate_style
@@ -167,7 +168,7 @@ def render_video():
                 style=TextStyle(**{
                     k: (str(resolve_font(v, FONTS_DIR)) if k == 'font_file' and v else v)
                     for k, v in line.get('style', {}).items()
-                    if hasattr(TextStyle, k)
+                    if k in {f.name for f in dataclasses.fields(TextStyle)}
                 }),
             )
             for i, line in enumerate(lines)
