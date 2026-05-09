@@ -2,12 +2,12 @@ import pathlib
 import torch
 
 VIDEO_LEN: float = 0.0
-PLAY_RES_X: int = 1920
+PLAY_RES_X: int = 1920              # fixed play resolution consistent scaling factor. Do not overwrite.
 PLAY_RES_Y: int = 1080
-VIDEO_W:   int   = 1920
+VIDEO_W:   int   = 1920             # actual video dimensions, set at runtime after upload
 VIDEO_H:   int   = 1080
 CHAR_WIDTH_RATIO: float = 0.5
-FONTS_DIR        = pathlib.Path(__file__).parent / "static" / "fonts"
+FONTS_DIR : pathlib.Path = pathlib.Path(__file__).parent / "static" / "fonts"
 
 #check if cuda is available
 def check_device():
