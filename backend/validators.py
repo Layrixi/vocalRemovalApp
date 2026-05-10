@@ -7,7 +7,6 @@ Each function returns an error string on failure, or None on success.
 import math
 from api_helpers import get_available_fonts_list, get_first_font_file
 from config import FONTS_DIR
-#to redo add: defaulting the style if value is not passed
 def validate_font_file(value) -> str | None:
     if value is None:
         return None
