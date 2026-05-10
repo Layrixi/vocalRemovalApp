@@ -1,4 +1,6 @@
 actual todo:
+- maybe add a constant +10/20px to the rendered font_size?
+- consider defaulting in validations or in other file. Just default if validation failed
 - make the preview overlay closer to truth(consider using scale with ffmpeg)
 - handle wrapping for angle and letter-spacing changes
 - handle all validations
