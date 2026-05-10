@@ -16,9 +16,9 @@ def validate_font_file(value) -> str | None:
             raise TypeError()
         if value not in get_available_fonts_list(FONTS_DIR, relative_only=True):
             raise ValueError()
-    except(ValueError):
+    except ValueError:
         return 'Font file not found in fonts directory.'
-    except(TypeError):
+    except TypeError:
         return 'Font file must be a string.'
     return None
 
@@ -118,6 +118,3 @@ def validate_style(style: dict) -> str | None:
             return err
 
     return None
-
-if __name__ == '__main__':
-    print("testing here")
