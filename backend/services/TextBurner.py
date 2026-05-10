@@ -54,7 +54,7 @@ class TextStyle:
     font_file:
         Path to a .ttf / .otf file.  When omitted ffmpeg uses its built-in font.
     """
-    
+    # consider more optional properties
     # ── Typography
     font_file:    Optional[str] = None  # path to .ttf/.otf font file; if None, ffmpeg's default font is used         
     font_size:    int           = 64
@@ -67,7 +67,7 @@ class TextStyle:
     angle:        int           = 0
     scale_x:      int           = 100
     scale_y:      int           = 100
- 
+    
     # ── Background box
     box:          bool          = False
     box_color:    str           = "#000000FF"
