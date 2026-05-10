@@ -235,24 +235,34 @@ function _commitStyle() {
 // ── Font list & FontFace loading ──────────────────────────────────────────────
 
 // actually loads the font to be usable in the page.
+
+const _fontLoadPromises = new Map();
 async function loadFont(fontName, filename) {
   if (state.loadedFonts.has(fontName)) return;
-  try {
-    const encodedPath = filename.split('/').map(encodeURIComponent).join('/');
-    const face = new FontFace(fontName, `url(/static/fonts/${encodedPath})`);
-    await face.load();
-    document.fonts.add(face);
-    state.loadedFonts.add(fontName);
-  } catch (e) {
-    console.warn(`Could not load font "${fontName}":`, e);
-  }
+  if (_fontLoadPromises.has(fontName)) return _fontLoadPromises.get(fontName);
+  const font = _doLoadFont(fontName, filename);
+  _fontLoadPromises.set(fontName, font);
+  await font;
 }
 
-fetchFontList();
+async function _doLoadFont(fontName, filename){
+  try {
+      const encodedPath = filename.split('/').map(encodeURIComponent).join('/');
+      const face = new FontFace(fontName, `url(/static/fonts/${encodedPath})`);
+      await face.load();
+      document.fonts.add(face);
+      state.loadedFonts.add(fontName);
+    } catch (e) {
+      console.warn(`Could not load font "${fontName}":`, e);
+    } finally {
+    _fontLoadPromises.delete(fontName); // clean up after settled
+  }
+}
 
 // ── Wire up inputs ────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  fetchFontList();
   document.getElementById('se_close').addEventListener('click', closeStyleEditor);
   document.getElementById('se_reset').addEventListener('click', () => {
     if (_editingIdx === null) return;
