@@ -83,9 +83,8 @@ def validate_style(style: dict) -> str | None:
     if not isinstance(style, dict):
         return 'style must be an object'
     
-    if not style.get('font_file'):
-        style['font_file'] = get_first_font_file(FONTS_DIR, relative_only=True)
-        print(f'[WARNING] No font_file passed, defaulting to: {style["font_file"]}')
+    if 'font_file' not in style:
+        return 'font_file is required'
     else:
         if err := validate_font_file(style['font_file']):
             return err
