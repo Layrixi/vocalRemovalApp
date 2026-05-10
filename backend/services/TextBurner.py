@@ -56,7 +56,7 @@ class TextStyle:
     """
     
     # ── Typography
-    font_file:    str           = None         
+    font_file:    Optional[str] = None  # path to .ttf/.otf font file; if None, ffmpeg's default font is used         
     font_size:    int           = 64
     font_color:   str           = "#FFFFFFFF"
     bold:         bool          = False
@@ -181,17 +181,16 @@ class TextBurner:
                 )
 
                 # Copy any custom font files into the temp dir so libass can find them
-                # via a single fontsdir= path on the subtitles filter.
-                unique_fonts = {
+                unique_fonts = [
                     pathlib.Path(line.style.font_file)
                     for line in lines
                     if line.style.font_file
-                }
+                ]
                 for font_path in unique_fonts:
-                    font_path = pathlib.Path(font_path)
-                    # validate font here
                     if font_path.is_file():
-                        shutil.copy2(font_path, temp_dir_path / font_path.name)
+                        # Prefix with parent folder name to avoid collisions when two fonts from different subdirectories share the same filename.
+                        dest_name = f"{font_path.parent.name}_{font_path.name}"
+                        shutil.copy2(font_path, temp_dir_path / dest_name)
 
                 escaped_ass  = self._escape_ass_path(ass_file)
                 escaped_fonts = self._escape_ass_path(temp_dir_path)
@@ -252,8 +251,9 @@ class TextBurner:
 
     def wrap_text(self, text: str, wrap_values: WrapValues, play_res_x: int) -> str:
         """Pre-wrap text using \\N (ASS hard break) so long words don't overflow the frame."""
-        usable_px      = play_res_x - 0.2*VIDEO_W # 10% marginX on each side
+        usable_px      = play_res_x*0.8 # 10% marginX on each side
         char_width_factor = 1.0
+        """Checked manually if there is any difference between both of them applied, there's none so we can scale it like that"""
         if wrap_values.bold or wrap_values.italic:
             char_width_factor *= 1.1
         char_width = wrap_values.font_size * get_char_width_ratio() * char_width_factor + wrap_values.letter_spacing
@@ -431,73 +431,26 @@ if __name__ == "__main__":
     vid = "karabin cut.mp4"
     video_path = VIDEO_DIR / vid
     burner = TextBurner()
-
-  
-    LINES2 = [
-        TextSegment(text="Let's get a little bit dirty", start_time=0.200651, end_time=0.727359, style=TextStyle(
-            font_file=None, 
-            font_size=71, 
-            font_color='#f31b1bFF', 
-            box=False, 
-            box_color='#000000FF',
-            box_padding=0, 
-            shadow=False, 
-            shadow_color='#000000FF', 
-            shadow_offset=0, 
-            outline_width=1, 
-            outline_color="#08FD00FF", 
-            vertical_position='center', 
-            horizontal_position='center')),
-         TextSegment(text='A little bit nasty, a little bit gross', start_time=0.727359, end_time=1.270788, style=TextStyle(
-            font_file=None, 
-            font_size=71, 
-            font_color='#f31b1bFF', 
-            box=True, 
-            box_color="#0571FFFF", 
-            box_padding=1, 
-            shadow=False, 
-            shadow_color='#000000FF', 
-            shadow_offset=0, 
-            outline_width=1, 
-            outline_color='#000000FF', 
-            vertical_position='center', 
-            horizontal_position='center')), 
-         TextSegment(text="Come on, it's never too early", start_time=1.270788, end_time=1.87274, style=TextStyle(
-            font_file=None, 
-            font_size=71, 
-            font_color='#f31b1bFF', 
-            box=False, 
-            box_color='#000000FF', 
-            box_padding=0, 
-            shadow=True, 
-            shadow_color="#15FF00FF", 
-            shadow_offset=1, 
-            outline_width=1, 
-            outline_color='#000000FF', 
-            vertical_position='center', 
-            horizontal_position='center')),
-         TextSegment(text="I need the kick badly, I'm ready to go", start_time=1.87274, end_time=None, style=TextStyle(
-            font_file=None, 
-            font_size=71, 
-            font_color='#f31b1bFF', 
-            box=True, 
-            box_color="#0571FFFF", 
-            box_padding=1, 
-            shadow=True, 
-            shadow_color="#00FF0DFF", 
-            shadow_offset=1, 
-            outline_width=1, 
-            outline_color='#000000FF', 
-            vertical_position='center', 
-            horizontal_position='center'))
-    ]
     out = OUTPUT_DIR / f"{video_path.stem}_burned.mp4"
+    linesRaw = [
+        {'text': 'aaa', 'timestamp': 0.36786, 'style': {'font_file': 'Abril_Fatface/AbrilFatface-Regular.ttf', 'font_size': 64, 'font_color': '#FFFFFFFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1}, 'wrappedText': ['aaa']},
+        {'text': 'aaaaa', 'timestamp': 1.170463, 'style': {'font_file': 'Cabin/Cabin-Regular.ttf', 'font_size': 64, 'font_color': '#ffffffFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1}, 'wrappedText': ['aaaaa']},
+        {'text': 'aaa', 'timestamp': 2.307484, 'style': {'font_file': 'Montserrat/Montserrat-Regular.ttf', 'font_size': 64, 'font_color': '#ffffffFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1}, 'wrappedText': ['aaa']},
+        {'text': 'bbbbbb', 'timestamp': 3.076645,'style': {'font_file': 'Roboto/Roboto-Regular.ttf', 'font_size': 64, 'font_color': '#ffffffFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1} , 'wrappedText': ['bbbbbb']},
+    ]
+    linesTextSegments = [
+        TextSegment(text='aaa', start_time=0.36786, end_time=1.170463, style=TextStyle(font_file='D:\\vocalRemovalApp\\backend\\static\\fonts\\Abril_Fatface\\AbrilFatface-Regular.ttf', font_size=64, font_color='#FFFFFFFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1)),
+        TextSegment(text='aaaaa', start_time=1.170463, end_time=2.307484, style=TextStyle(font_file='D:\\vocalRemovalApp\\backend\\static\\fonts\\Cabin\\Cabin-Regular.ttf', font_size=64, font_color='#ffffffFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1)),
+        TextSegment(text='aaa', start_time=2.307484, end_time=3.076645, style=TextStyle(font_file='D:\\vocalRemovalApp\\backend\\static\\fonts\\Montserrat\\Montserrat-Regular.ttf', font_size=64, font_color='#ffffffFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1)),
+        TextSegment(text='bbbbbb', start_time=3.076645, end_time=None, style=TextStyle(font_file='D:\\vocalRemovalApp\\backend\\static\\fonts\\Roboto\\Roboto-Regular.ttf', font_size=64, font_color='#ffffffFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1))
+    ]
+    
     _probe_and_set_duration(video_path)
     video_duration = get_video_duration()
     print(f"Video duration: {video_duration} seconds")
     print(f"--- Burning subtitles → {out} ---")
     try:
-        out = burner.burn(video_path=video_path, output_path=out, lines=LINES2,verbose=True)
+        out = burner.burn(video_path=video_path, output_path=out, lines=linesRaw, verbose=True)
     except RuntimeError as e:
         print(e)
     
