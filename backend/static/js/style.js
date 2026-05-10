@@ -28,7 +28,7 @@ async function applyStyleToOverlay(style) {
   }
 
   //scale appropriate style values (matches backend scaling logic)
-  scaleCss = (video.clientHeight || 360) / (state.wrapConfig.play_res_y);
+  const scaleCss = (video.clientHeight || 360) / (state.wrapConfig.play_res_y);
   elem.style.fontSize = (style.font_size * scaleCss) + 'px';
   elem.style.webkitTextStroke = style.outline_width > 0
     ? `${style.outline_width * scaleCss}px ${style.outline_color}` : '0';
