@@ -9,6 +9,7 @@ import shutil
 from fontTools import ttLib
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
 from config import VIDEO_W,PLAY_RES_X, PLAY_RES_Y, set_video_duration, get_video_duration, set_video_dimensions, get_video_dimensions, get_char_width_ratio
+import logging
 
 """
 Class responsible for applying the text to the video.
@@ -205,7 +206,8 @@ class TextBurner:
                     '-c:a', audio_codec,
                     str(output_path),
                 ], verbose=verbose)
-                print(f"Video saved to: {output_path}")
+                logger = logging.getLogger(__name__)
+                logger.debug(f"Video saved to: {output_path}")
         except RuntimeError as e:
             return RuntimeError(f"Failed to burn subtitles: {e}")
             
