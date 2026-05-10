@@ -16,7 +16,7 @@ import dataclasses
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from validators import validate_style
-from api_helpers import resolve_font, get_available_fonts_list
+from api_helpers import get_first_font_file, resolve_font, get_available_fonts_list
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
@@ -151,8 +151,14 @@ def render_video():
     if not video_path.exists() or not video_path.is_file():
         return jsonify({'error': 'Video file not found'}), 404
     #validate input styles before preping it
+    #first av. font file should be fetched at the startup, leaving it for a later refactor
+    default_style = dataclasses.asdict(TextStyle())
+    default_style['font_file'] = get_first_font_file(FONTS_DIR, relative_only=True)
     for i, line in enumerate(lines):
         style = line.setdefault('style', {})
+        # fill every missing key with the TextStyle default
+        for key, value in default_style.items():
+            style.setdefault(key, value)
         err = validate_style(style)
         if err:
             return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
