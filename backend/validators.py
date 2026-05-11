@@ -2,18 +2,22 @@
 Input validation helpers for API.
 Each function returns an error string on failure, or None on success.
 """
-
-
 import math
 from api_helpers import get_available_fonts_list, get_first_font_file
 from config import FONTS_DIR
+
+_AVAILABLE_FONTS_CACHE: list[str] | None = None
+
 def validate_font_file(value) -> str | None:
     if value is None:
         return None
     try:
         if not isinstance(value, str):
             raise TypeError()
-        if value not in get_available_fonts_list(FONTS_DIR, relative_only=True):
+        global _AVAILABLE_FONTS_CACHE
+        if _AVAILABLE_FONTS_CACHE is None:
+            _AVAILABLE_FONTS_CACHE = get_available_fonts_list(FONTS_DIR, relative_only=True)
+        if value not in _AVAILABLE_FONTS_CACHE:
             raise ValueError()
     except ValueError:
         return 'Font file not found in fonts directory.'
