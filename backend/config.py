@@ -1,6 +1,6 @@
 import pathlib
 import torch
-from api_helpers import resolve_font
+from .api_helpers import resolve_font
 
 VIDEO_LEN: float = 0.0
 PLAY_RES_X: int = 1920              # fixed play resolution consistent scaling factor. Do not overwrite.

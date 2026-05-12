@@ -4,7 +4,7 @@ Each function returns an error string on failure, or None on success.
 """
 import math
 
-from config import AVAILABLE_FONTS
+from .config import AVAILABLE_FONTS
 
 def validate_font_file(value) -> str | None:
     if value is None:

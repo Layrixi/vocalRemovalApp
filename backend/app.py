@@ -7,14 +7,12 @@ import subprocess
 import tempfile
 import soundfile as sf
 from werkzeug.utils import secure_filename
-import sys
-sys.path.append(str(pathlib.Path(__file__).parent))
-from config import FONTS_DIR, FIRST_FONT, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_available_fonts, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 import dataclasses
-from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
-from services.VocalRemovalModelHandler import vocalRemovalModelHandler
-from validators import validate_style
-from api_helpers import resolve_font
+from .config import FONTS_DIR, FIRST_FONT, PLAY_RES_X, PLAY_RES_Y, check_device, set_video_duration, get_available_fonts, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+from .services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
+from .services.VocalRemovalModelHandler import vocalRemovalModelHandler
+from .validators import validate_style
+from .api_helpers import resolve_font
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"

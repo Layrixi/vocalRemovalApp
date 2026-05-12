@@ -1,14 +1,12 @@
 import subprocess
 import pathlib
-import sys
 import tempfile
 import json
 from dataclasses import dataclass, field
 from typing import Optional
 import shutil
 from fontTools import ttLib
-sys.path.append(str(pathlib.Path(__file__).parent.parent))
-from config import VIDEO_W,PLAY_RES_X, PLAY_RES_Y, set_video_duration, get_video_duration, set_video_dimensions, get_video_dimensions, get_char_width_ratio
+from ..config import VIDEO_W, PLAY_RES_X, PLAY_RES_Y, set_video_duration, get_video_duration, set_video_dimensions, get_video_dimensions, get_char_width_ratio
 import logging
 
 """
