@@ -207,7 +207,7 @@ class TextBurner:
                 logger = logging.getLogger(__name__)
                 logger.debug(f"Video saved to: {output_path}")
         except RuntimeError as e:
-            return RuntimeError(f"Failed to burn subtitles: {e}")
+            raise RuntimeError(f"Failed to burn subtitles: {e}")
             
         return output_path
 
@@ -231,7 +231,7 @@ class TextBurner:
 
     def _run_ffmpeg(self, cmd: list[str], verbose: bool):
         if verbose:
-            logging.debug("Running:", " ".join(cmd))
+            logging.debug("Running: %s", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=not verbose, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"ffmpeg failed:\n{result.stderr}")
@@ -438,8 +438,8 @@ if __name__ == "__main__":
         {'text': 'aaa', 'timestamp': 2.307484, 'style': {'font_file': 'Montserrat/Montserrat-Regular.ttf', 'font_size': 64, 'font_color': '#ffffffFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1}, 'wrappedText': ['aaa']},
         {'text': 'bbbbbb', 'timestamp': 3.076645,'style': {'font_file': 'Roboto/Roboto-Regular.ttf', 'font_size': 64, 'font_color': '#ffffffFF', 'box': False, 'box_color': '#000000FF', 'box_padding': 1, 'shadow': False, 'shadow_color': '#000000FF', 'shadow_offset': 1, 'outline_width': 1, 'outline_color': '#000000FF', 'vertical_position': 'center', 'horizontal_position': 'center', 'bold': False, 'italic': False, 'underline': False, 'strikeout': False, 'letter_spacing': 0, 'angle': 0, 'scale_x': 100, 'scale_y': 100, 'encoding': 1} , 'wrappedText': ['bbbbbb']},
     ]
-    from api_helpers import resolve_font
-    from config import FONTS_DIR
+    from ..api_helpers import resolve_font
+    from ..config import FONTS_DIR
     linesTextSegments = [
         TextSegment(text='aaa', start_time=0.36786, end_time=1.170463, style=TextStyle(font_file=str(resolve_font('Abril_Fatface/AbrilFatface-Regular.ttf', FONTS_DIR)), font_size=64, font_color='#FFFFFFFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1)),
         TextSegment(text='aaaaa', start_time=1.170463, end_time=2.307484, style=TextStyle(font_file=str(resolve_font('Cabin/Cabin-Regular.ttf', FONTS_DIR)), font_size=64, font_color='#ffffffFF', bold=False, italic=False, underline=False, strikeout=False, letter_spacing=0, angle=0, scale_x=100, scale_y=100, box=False, box_color='#000000FF', box_padding=1, shadow=False, shadow_color='#000000FF', shadow_offset=1, outline_width=1, outline_color='#000000FF', vertical_position='center', horizontal_position='center', encoding=1)),
@@ -452,7 +452,7 @@ if __name__ == "__main__":
     print(f"Video duration: {video_duration} seconds")
     print(f"--- Burning subtitles → {out} ---")
     try:
-        out = burner.burn(video_path=video_path, output_path=out, lines=linesRaw, verbose=True)
+        out = burner.burn(video_path=video_path, output_path=out, lines=linesTextSegments, verbose=True)
     except RuntimeError as e:
         print(e)
     
