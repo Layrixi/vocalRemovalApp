@@ -2,21 +2,19 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import uuid
 import pathlib
 import json
-
 # text burning
 import subprocess
 import tempfile
-
 import soundfile as sf
 from werkzeug.utils import secure_filename
 import sys
 sys.path.append(str(pathlib.Path(__file__).parent))
-from config import FONTS_DIR, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+from config import FONTS_DIR, FIRST_FONT, PLAY_RES_X,PLAY_RES_Y, check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 import dataclasses
 from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from validators import validate_style
-from api_helpers import get_first_font_file, resolve_font, get_available_fonts_list
+from api_helpers import resolve_font, get_available_fonts_list
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
@@ -153,7 +151,7 @@ def render_video():
     #validate input styles before preping it
     #first av. font file should be fetched at the startup, leaving it for a later refactor
     default_style = dataclasses.asdict(TextStyle())
-    default_style['font_file'] = get_first_font_file(FONTS_DIR, relative_only=True)
+    default_style['font_file'] = FIRST_FONT
     for i, line in enumerate(lines):
         style = line.setdefault('style', {})
         # fill every missing key with the TextStyle default

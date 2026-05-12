@@ -1,5 +1,6 @@
 import pathlib
 import torch
+from api_helpers import get_first_font_file
 
 VIDEO_LEN: float = 0.0
 PLAY_RES_X: int = 1920              # fixed play resolution consistent scaling factor. Do not overwrite.
@@ -8,7 +9,7 @@ VIDEO_W:   int   = 1920             # actual video dimensions, set at runtime af
 VIDEO_H:   int   = 1080
 CHAR_WIDTH_RATIO: float = 0.5
 FONTS_DIR : pathlib.Path = pathlib.Path(__file__).parent / "static" / "fonts"
-
+FIRST_FONT: pathlib.Path = get_first_font_file(FONTS_DIR)
 #check if cuda is available
 def check_device():
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -17,7 +18,6 @@ def check_device():
 #returns path to the uploaded audio file
 def get_audio_path(filename):
     return pathlib.Path(__file__).parent / "uploads" / "audio" / filename
-
 
 def set_video_duration(seconds: float):
     global VIDEO_LEN
