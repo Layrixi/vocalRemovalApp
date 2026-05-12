@@ -14,19 +14,32 @@ const _OVERLAY_POS = {
 
 
 //applies style to line shown on the overlay
-function applyStyleToOverlay(style) {
+async function applyStyleToOverlay(style) {
   const elem      = overlayText;
   const overlay = document.querySelector('.video-lyrics-overlay');
 
-  const fontName = style.font_file
-    ? style.font_file.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '')
+  const fontFile = style.font_file || state.availableFonts[0] || null;
+  const fontName = fontFile
+    ? fontFile.split('/').pop().replace(/\.[^.]+$/, '')  // strip dir prefix and extension
     : 'Arial';
 
+  if (fontFile) {
+    await loadFont(fontName, fontFile);
+  }
+
+  //scale appropriate style values (matches backend scaling logic)
+  const scaleCss = (video.clientHeight || 360) / (state.wrapConfig.play_res_y);
+  elem.style.fontSize = (style.font_size * scaleCss) + 'px';
+  elem.style.webkitTextStroke = style.outline_width > 0
+    ? `${style.outline_width * scaleCss}px ${style.outline_color}` : '0';
+  elem.style.paintOrder = 'stroke fill';
+  elem.style.letterSpacing   = (style.letter_spacing * scaleCss) + 'px';
+  elem.style.textShadow = style.shadow
+    ? `${style.shadow_offset * scaleCss}px ${style.shadow_offset * scaleCss}px 0 ${_hex8ToCssColor(style.shadow_color)}`
+    : 'none';
+    
   elem.style.fontFamily       = `"${fontName}", sans-serif`;
   elem.style.color            = style.font_color;
-  elem.style.webkitTextStroke = style.outline_width > 0
-    ? `${style.outline_width}px ${style.outline_color}` : '0';
-
   elem.style.fontWeight      = style.bold ? 'bold' : 'normal';
   elem.style.fontStyle       = style.italic ? 'italic' : 'normal';
   elem.style.textDecoration  = [
@@ -34,26 +47,18 @@ function applyStyleToOverlay(style) {
     style.strikeout ? 'line-through' : ''
   ].filter(s => s).join(' ');
   elem.style.textDecorationColor = style.font_color;
-  elem.style.letterSpacing   = style.letter_spacing + 'px';
-  elem.style.transform       = `rotate(${style.angle}deg)`;
+  
+  elem.style.transform       = `rotate(${style.angle}deg) scaleX(${(style.scale_x ?? 100) / 100}) scaleY(${(style.scale_y ?? 100) / 100})`;
 
   if (style.box) {
     elem.style.backgroundColor = style.box_color;
-    elem.style.padding         = style.box_padding + 'px';
+    elem.style.padding         = (style.box_padding * scaleCss) + 'px';
   } else {
     elem.style.backgroundColor = 'transparent';
     elem.style.padding         = '0';
   }
 
-  elem.style.textShadow = style.shadow
-    ? `${style.shadow_offset}px ${style.shadow_offset}px 0 ${_hex8ToCssColor(style.shadow_color)}`
-    : 'none';
-
   elem.style.textAlign = style.horizontal_position;
-
-  // Scale font size
-  const videoH = video.clientHeight || 360;
-  elem.style.fontSize = (style.font_size / state.wrapConfig.play_res_y * videoH) + 'px';
 
   // Reposition overlay container
   if (overlay) {
@@ -76,7 +81,7 @@ function openStyleEditor(idx) {
     `Line ${idx + 1} · "${state.lines[idx].text.slice(0, 36)}${state.lines[idx].text.length > 36 ? '…' : ''}"`;
 
   // Populate every field from the line's style
-  _setField('se_font_file',   s.font_file || '');
+  _setField('se_font_file',   s.font_file || state.availableFonts[0] || '');//may need refactor for readability and scalability, works for now
   _setField('se_font_size',   s.font_size);
   _setColor('se_font_color',  s.font_color);
   _setCheck('se_bold',        s.bold);
@@ -227,10 +232,37 @@ function _commitStyle() {
   }
 }
 
+// ── Font list & FontFace loading ──────────────────────────────────────────────
+
+// actually loads the font to be usable in the page.
+
+const _fontLoadPromises = new Map();
+async function loadFont(fontName, filename) {
+  if (state.loadedFonts.has(fontName)) return;
+  if (_fontLoadPromises.has(fontName)) return _fontLoadPromises.get(fontName);
+  const font = _doLoadFont(fontName, filename);
+  _fontLoadPromises.set(fontName, font);
+  await font;
+}
+
+async function _doLoadFont(fontName, filename){
+  try {
+      const encodedPath = filename.split('/').map(encodeURIComponent).join('/');
+      const face = new FontFace(fontName, `url(/static/fonts/${encodedPath})`);
+      await face.load();
+      document.fonts.add(face);
+      state.loadedFonts.add(fontName);
+    } catch (e) {
+      console.warn(`Could not load font "${fontName}":`, e);
+    } finally {
+    _fontLoadPromises.delete(fontName); // clean up after settled
+  }
+}
 
 // ── Wire up inputs ────────────────────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  fetchFontList();
   document.getElementById('se_close').addEventListener('click', closeStyleEditor);
   document.getElementById('se_reset').addEventListener('click', () => {
     if (_editingIdx === null) return;

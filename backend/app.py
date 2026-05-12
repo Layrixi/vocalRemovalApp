@@ -2,19 +2,17 @@ from flask import Flask, render_template, request, jsonify, send_from_directory
 import uuid
 import pathlib
 import json
-
 # text burning
 import subprocess
 import tempfile
-
 import soundfile as sf
 from werkzeug.utils import secure_filename
-import sys
-sys.path.append(str(pathlib.Path(__file__).parent))
-from config import check_device, set_video_duration, get_video_duration, get_video_dimensions, get_char_width_ratio, set_video_dimensions
-from services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
-from services.VocalRemovalModelHandler import vocalRemovalModelHandler
-from validators import validate_style, validate_font_size
+import dataclasses
+from .config import FONTS_DIR, FIRST_FONT, PLAY_RES_X, PLAY_RES_Y, check_device, set_video_duration, get_available_fonts, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+from .services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
+from .services.VocalRemovalModelHandler import vocalRemovalModelHandler
+from .validators import validate_style
+from .api_helpers import resolve_font
 
 UPLOAD_VIDEO_DIR = pathlib.Path(__file__).parent / "uploads" / "video"
 UPLOAD_AUDIO_DIR = pathlib.Path(__file__).parent / "uploads" / "audio"
@@ -127,7 +125,6 @@ def download_file(filename):
     safe_name = secure_filename(filename)
     return send_from_directory(str(OUTPUT_DIR), safe_name, as_attachment=True)
 
-
 # POST { filename, lines: [{text, timestamp}, …] }
 # Passes the video to the burn function, which burns the text into the video 
 # with user-provided style or default one
@@ -149,30 +146,36 @@ def render_video():
     video_path = UPLOAD_VIDEO_DIR / safe_name
     if not video_path.exists() or not video_path.is_file():
         return jsonify({'error': 'Video file not found'}), 404
-
     #validate input styles before preping it
     for i, line in enumerate(lines):
-        style = line.get('style', {})
-        if style:
-            err = validate_style(style)
-            if err:
-                return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
+        style = line.setdefault('style', {})
+        _fill_default_style(style)
+        err = validate_style(style)
+        if err:
+            return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
 
     #text preparation
-    text_segments = [
-        # for every line unpack the text, timestamp and style (if it exists) into a TextSegment dataclass
-        TextSegment(
-            text=line['text'],
-            start_time=float(line['timestamp']),
-            end_time=float(lines[i + 1]['timestamp']) if i + 1 < len(lines) else None,
-            style=TextStyle(**{k: v for k, v in line.get('style', {}).items() if hasattr(TextStyle, k)}),
-        )
-        for i, line in enumerate(lines)
-    ]
+    try:
+        text_segments = [
+            # for every line unpack the text, timestamp and style (if it exists) into a TextSegment dataclass
+            TextSegment(
+                text=line['text'],
+                start_time=float(line['timestamp']),
+                end_time=float(lines[i + 1]['timestamp']) if i + 1 < len(lines) else None,
+                style=TextStyle(**{
+                    k: (str(resolve_font(v, FONTS_DIR)) if k == 'font_file' and v else v)
+                    for k, v in line.get('style', {}).items()
+                    if k in {f.name for f in dataclasses.fields(TextStyle)}
+                }),
+            )
+            for i, line in enumerate(lines)
+        ]
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     output_filename = f"{video_path.stem}_karaoke.mp4"
     output_path = OUTPUT_DIR / output_filename
     try:
-        renderer = TextBurner(ffmpeg_path="ffmpeg")  # May add adjusting path if ffmpeg is not in system PATH, but it's in the readme so may not as well
+        renderer = TextBurner(ffmpeg_path="ffmpeg")  # May add adjusting path if ffmpeg is not in system PATH, or install it locally later when unpacking the app
         renderer.burn(video_path=video_path, output_path=output_path, lines=text_segments)
     except Exception as e:
         return jsonify({'error': f'Video rendering failed: {e}'}), 500
@@ -188,8 +191,10 @@ def get_wrap_config():
     return jsonify({
         'font_size':        style.font_size,
         'char_width_ratio': get_char_width_ratio(),
-        'play_res_x':       video_w,
-        'play_res_y':       video_h,
+        'play_res_x':       PLAY_RES_X,
+        'play_res_y':       PLAY_RES_Y,
+        'videoW':          video_w,
+        'videoH':          video_h,
     })
 
 
@@ -202,17 +207,33 @@ def wrap_text_route():
 
     text = str(data['text'])
     style = data['style']
+    _fill_default_style(style)
     err = validate_style(style)
     if err:
         return jsonify({'error': err}), 400
 
-    video_w, _ = get_video_dimensions()
     burner = TextBurner()
-    wrapped = burner.wrap_text(text, WrapValues(style), video_w)
+    wrapped = burner.wrap_text(text, WrapValues(style), PLAY_RES_X)
     lines = [segment for segment in wrapped.split('\\N') if segment]
     if not lines:
         return jsonify({'error': 'text is empty'}), 400
     return jsonify({'lines': lines})
+
+
+@app.route('/api/fonts', methods=['GET'])
+def get_fonts():
+    """Return the relative paths of all font files available in the fonts directory."""
+    fonts = get_available_fonts()
+    if not fonts:
+        return jsonify({'error': 'No fonts found in the fonts directory'}), 500
+    return jsonify({'fonts': fonts})
+
+def _fill_default_style(style: dict) -> None:
+    """Fill any missing style keys in-place with TextStyle defaults and the first available font."""
+    defaults = dataclasses.asdict(TextStyle())
+    defaults['font_file'] = FIRST_FONT
+    for key, value in defaults.items():
+        style.setdefault(key, value)
 
 
 if __name__ == '__main__':

@@ -5,11 +5,7 @@ import pathlib
 import torch
 import soundfile as sf
 
-#add the parent directory to the path, may need to be changed later
-import sys
-import pathlib
-sys.path.append(str(pathlib.Path(__file__).parent.parent))
-from config import check_device, get_audio_path
+from ..config import check_device, get_audio_path
 
 #uses demucs for now, will create a custom model later on
 #but remember to adapt segment variable to the gpu

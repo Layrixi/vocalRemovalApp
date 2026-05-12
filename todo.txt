@@ -1,9 +1,11 @@
 actual todo:
-- make the preview overlay closer to truth
+- maybe add a constant +10/20px to the rendered font_size?
+- set better constants for wrapping or make it dynamic to the font or something
+- consider defaulting in validations or in other file. Just default if validation failed
+- make the preview overlay closer to truth(consider using scale with ffmpeg)
 - handle wrapping for angle and letter-spacing changes
 - handle all validations
-- make it so it doesn't rewrap instantly when the user is still writing in font name field
-- check if wrap-config at the frontend is actually used anywhere, if not remove it
+- I think it saves the file twice, when the user donwloads and in the output folder. Handle it
 - error handling(few error handlers implemented, they raise but not handled on the front-end)
 - make it possible to scale the time bar
 - apply karaoke format of ASS or make my own (depend on the ASS version)
@@ -13,10 +15,11 @@ actual todo:
 - make timestamped lines more readable. For example when the mouse hover's over the timestamp, it then shows the text instead of simply showing it right now coz it can make a mess with fast changing texts.
 - make it possible to render 2 lines at the same time, rap songs or other fast ones case
 - make it possible to switch between instrumental and vocal version of audio
-- add fonts so ffmpeg gets more fonts to choose from
+- add more fonts to choose from
 - build own removal model
 - bug: line displaying dynamic scaling acts weird when the window is getting too small (like phone size)
 - uploads stay in the "cache".
+- consider variable fonts, but I don't think it's something worth spending time and adjusting the app to.
 - !may not be a problem; If video gets deleted, it stays in the cache
     Generates problem with vocal removal - file not found. Add a fix that gets the video again from the cache.
 

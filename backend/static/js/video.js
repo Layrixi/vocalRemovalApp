@@ -39,7 +39,12 @@ function loadVideo(file) {
     .then(filename => {
       if (!filename) return null;
       state.uploadedVideoFilename = filename;
-      showPopUp('Video uploaded to server');})
+      showPopUp('Video uploaded to server');
+      // Fetch accurate play_res and video dimensions now that the backend has probed the file
+      return fetch('/api/wrap-config')
+        .then(response => response.ok ? response.json() : null)
+        .then(config => { if (config) state.wrapConfig = config; });
+    })
     .then(result => {
       if (result === null) return;
       // Re-wrap all lines now that we have accurate video dimensions

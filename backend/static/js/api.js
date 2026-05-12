@@ -96,3 +96,31 @@ document.getElementById('renderVideoBtn').addEventListener('click', async () => 
     btn.textContent = 'Render Video';
   }
 });
+
+// --  FONT API CALL --
+
+async function fetchFontList() {
+  try {
+    const res = await fetch('/api/fonts');
+    if (!res.ok) return;
+    const data = await res.json();
+    state.availableFonts = data.fonts;
+    if (data.fonts.length > 0) {
+      DEFAULT_STYLE.font_file = data.fonts[0];
+    }
+    const fonts = Array.isArray(data.fonts) ? data.fonts : [];
+    state.availableFonts = fonts;
+    DEFAULT_STYLE.font_file = fonts[0] ?? '';
+    const select = document.getElementById('se_font_file');
+    select.innerHTML = '';  // clear existing options
+    fonts.forEach(filename => {
+      const option = document.createElement('option');
+      option.value = filename;
+      const stem = filename.split('/').pop().replace(/\.[^.]+$/, '');
+      option.textContent = stem;  // display filename stem only, without folder prefix or extension
+      select.appendChild(option);
+    });
+  } catch (e) {
+    console.warn('Could not load font list:', e);
+  }
+}

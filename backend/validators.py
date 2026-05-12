@@ -2,14 +2,22 @@
 Input validation helpers for API.
 Each function returns an error string on failure, or None on success.
 """
-
-
 import math
 
+from .config import AVAILABLE_FONTS
 
 def validate_font_file(value) -> str | None:
-    if value is not None and not isinstance(value, str):
-        return 'font_file must be a string'
+    if value is None:
+        raise ValueError
+    try:
+        if not isinstance(value, str):
+            raise TypeError()
+        if value not in AVAILABLE_FONTS:
+            raise ValueError()
+    except ValueError:
+        return 'Font file not found in fonts directory.'
+    except TypeError:
+        return 'Font file must be a string.'
     return None
 
 
@@ -73,7 +81,9 @@ def validate_style(style: dict) -> str | None:
     if not isinstance(style, dict):
         return 'style must be an object'
     
-    if 'font_file' in style:
+    if 'font_file' not in style:
+        return 'font_file is required'
+    else:
         if err := validate_font_file(style['font_file']):
             return err
 

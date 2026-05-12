@@ -24,6 +24,8 @@ let DEFAULT_STYLE = {
   // _____________
   letter_spacing:      0, //px
   angle:               0, //degrees
+  scale_x:             100, // horizontal scale %
+  scale_y:             100, // vertical scale %
   encoding:            1,   // ASS encoding value; 1 = OS default (most cases UTF-8)
 
 };
@@ -35,7 +37,9 @@ const state = {
   uploadedVideoFilename: null,
   speeds: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
   speedIdx: 3,
-  wrapConfig: { font_size: 64, char_width_ratio: 0.5, play_res_x: 1920, play_res_y: 1080 },
+  wrapConfig: { font_size: 64, char_width_ratio: 0.5, play_res_x: 1920, play_res_y: 1080 , videoW: 1920, videoH: 1080},
+  availableFonts: [],   // populated by fetchFontList() from /api/fonts, responsible for keeping font names
+  loadedFonts: new Set(), // fonts fetched and registered via FontFace API
 };
 
 //  ELEMENTS 
