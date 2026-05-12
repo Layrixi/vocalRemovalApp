@@ -149,14 +149,9 @@ def render_video():
     if not video_path.exists() or not video_path.is_file():
         return jsonify({'error': 'Video file not found'}), 404
     #validate input styles before preping it
-    #first av. font file should be fetched at the startup, leaving it for a later refactor
-    default_style = dataclasses.asdict(TextStyle())
-    default_style['font_file'] = FIRST_FONT
     for i, line in enumerate(lines):
         style = line.setdefault('style', {})
-        # fill every missing key with the TextStyle default
-        for key, value in default_style.items():
-            style.setdefault(key, value)
+        _fill_default_style(style)
         err = validate_style(style)
         if err:
             return jsonify({'error': f'Invalid style on line {i + 1}: {err}'}), 400
@@ -214,6 +209,7 @@ def wrap_text_route():
 
     text = str(data['text'])
     style = data['style']
+    _fill_default_style(style)
     err = validate_style(style)
     if err:
         return jsonify({'error': err}), 400

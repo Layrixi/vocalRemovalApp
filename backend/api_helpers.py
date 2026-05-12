@@ -9,6 +9,3 @@ def resolve_font(relative: str, fonts_dir: pathlib.Path) -> pathlib.Path:
     if not resolved.exists() or not resolved.is_file():
         raise ValueError(f"Font file not found: {relative}")
     return resolved
-
-
-
