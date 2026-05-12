@@ -109,6 +109,7 @@ async function fetchFontList() {
       DEFAULT_STYLE.font_file = data.fonts[0];
     }
     const select = document.getElementById('se_font_file');
+    select.innerHTML = '';  // clear existing options
     data.fonts.forEach(filename => {
       const option = document.createElement('option');
       option.value = filename;
