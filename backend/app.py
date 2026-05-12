@@ -226,6 +226,8 @@ def wrap_text_route():
 def get_fonts():
     """Return the relative paths of all font files available in the fonts directory."""
     fonts = get_available_fonts()
+    if not fonts:
+        return jsonify({'error': 'No fonts found in the fonts directory'}), 500
     return jsonify({'fonts': fonts})
 
 def _fill_default_style(style: dict) -> None:
