@@ -233,7 +233,7 @@ class TextBurner:
 
     def _run_ffmpeg(self, cmd: list[str], verbose: bool):
         if verbose:
-            print("Running:", " ".join(cmd))
+            logging.debug("Running:", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=not verbose, text=True)
         if result.returncode != 0:
             raise RuntimeError(f"ffmpeg failed:\n{result.stderr}")
