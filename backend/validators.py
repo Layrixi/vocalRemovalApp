@@ -8,7 +8,7 @@ from .config import AVAILABLE_FONTS
 
 def validate_font_file(value) -> str | None:
     if value is None:
-        return None
+        raise ValueError
     try:
         if not isinstance(value, str):
             raise TypeError()
