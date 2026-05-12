@@ -228,6 +228,14 @@ def get_fonts():
     fonts = get_available_fonts()
     return jsonify({'fonts': fonts})
 
+def _fill_default_style(style: dict) -> None:
+    """Fill any missing style keys in-place with TextStyle defaults and the first available font."""
+    defaults = dataclasses.asdict(TextStyle())
+    defaults['font_file'] = FIRST_FONT
+    for key, value in defaults.items():
+        style.setdefault(key, value)
+
+
 if __name__ == '__main__':
     # debug=false in prod later, change the port adequatly to the pc(if possible)
     # use_reloader=False prevents WinError 10038 (socket inheritance issue on Windows)
