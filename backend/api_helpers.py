@@ -1,5 +1,5 @@
 import pathlib
-from flask import logging
+import logging
 from fontTools import ttLib
 
 def resolve_font(relative: str, fonts_dir: pathlib.Path) -> pathlib.Path:
