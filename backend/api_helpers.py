@@ -19,7 +19,7 @@ def get_libass_scale_factor(font_path: pathlib.Path) -> float:
         hhea = font['hhea']
         hori_height = hhea.ascent - hhea.descent
         #reading os2 for old fonts may result in KeyError, so it will log a warning and fallback to 0.8
-        os2 = font['OS_2']
+        os2 = font['OS/2']
         os2_height = os2.usWinAscent + os2.usWinDescent
         if hori_height and os2_height:
             return hori_height / os2_height
