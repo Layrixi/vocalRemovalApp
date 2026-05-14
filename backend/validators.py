@@ -4,7 +4,7 @@ Each function returns an error string on failure, or None on success.
 """
 import math
 
-from .config import AVAILABLE_FONTS
+from .config import get_available_fonts
 
 def validate_font_file(value) -> str | None:
     if value is None:
@@ -12,7 +12,7 @@ def validate_font_file(value) -> str | None:
     try:
         if not isinstance(value, str):
             raise TypeError()
-        if value not in AVAILABLE_FONTS:
+        if value not in get_available_fonts():
             raise ValueError()
     except ValueError:
         return 'Font file not found in fonts directory.'

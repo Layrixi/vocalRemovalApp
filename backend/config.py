@@ -1,6 +1,6 @@
 import pathlib
 import torch
-from .api_helpers import resolve_font
+from .api_helpers import resolve_font, get_libass_scale_factor
 
 VIDEO_LEN: float = 0.0
 PLAY_RES_X: int = 1920              # fixed play resolution consistent scaling factor. Do not overwrite.
@@ -11,6 +11,7 @@ CHAR_WIDTH_RATIO: float = 0.5
 FONTS_DIR : pathlib.Path = pathlib.Path(__file__).parent / "static" / "fonts"
 AVAILABLE_FONTS: list[str] = []  # populated after function definitions below
 FIRST_FONT: str = ""             # same here
+FONTS_AND_SCALE_FACTORS: dict[str, float] = {}  # scale factors for each font, refactor to use this dict later instead
 #check if cuda is available
 def check_device():
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -38,22 +39,17 @@ def get_video_dimensions() -> tuple[int, int]:
 def get_char_width_ratio() -> float:
     return CHAR_WIDTH_RATIO
 
-def set_available_fonts(fonts_dir: pathlib.Path, relative_only: bool = False) -> list[str]:
-    """Returns a list of available fonts in a resolved form."""
-    global AVAILABLE_FONTS
+def set_available_fonts(fonts_dir: pathlib.Path) -> list[str]:
+    """Returns a dict of available fonts in a resolved form with their corresponding scale factors."""
+    global FONTS_AND_SCALE_FACTORS
     fonts = _scan_font_files(fonts_dir)
-    if relative_only:
-        AVAILABLE_FONTS = fonts
-    else:
-        resolved_fonts = []
-        for font in fonts:
-            resolved_fonts.append(resolve_font(font, fonts_dir))
-        AVAILABLE_FONTS = resolved_fonts
-    return AVAILABLE_FONTS
+    for font in fonts:
+        FONTS_AND_SCALE_FACTORS[font] = get_libass_scale_factor(resolve_font(font, fonts_dir))
+    return FONTS_AND_SCALE_FACTORS
 
 def get_available_fonts() -> list[str]:
     """Returns a list of available fonts in a resolved form."""
-    return AVAILABLE_FONTS
+    return list(FONTS_AND_SCALE_FACTORS.keys())
 
 def _scan_font_files(fonts_dir: pathlib.Path) -> list[str]:
     fonts = sorted(
@@ -65,5 +61,5 @@ def _scan_font_files(fonts_dir: pathlib.Path) -> list[str]:
         raise ValueError("INTERNAL APP ERROR: No font files found in the fonts directory.")
     return fonts
 
-AVAILABLE_FONTS = set_available_fonts(FONTS_DIR, relative_only=True)
-FIRST_FONT = AVAILABLE_FONTS[0]
+FONTS_AND_SCALE_FACTORS = set_available_fonts(FONTS_DIR)
+FIRST_FONT = list(FONTS_AND_SCALE_FACTORS.keys())[0]
