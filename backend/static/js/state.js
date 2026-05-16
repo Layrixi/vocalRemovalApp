@@ -37,8 +37,9 @@ const state = {
   uploadedVideoFilename: null,
   speeds: [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2],
   speedIdx: 3,
-  wrapConfig: { font_size: 64, char_width_ratio: 0.5, play_res_x: 1920, play_res_y: 1080 , videoW: 1920, videoH: 1080},
-  availableFonts: [],   // populated by fetchFontList() from /api/fonts, responsible for keeping font names
+  libassConfig: { font_size: 64, char_width_ratio: 0.5, play_res_x: 1920, play_res_y: 1080 , videoW: 1920, videoH: 1080},
+  fontScaleFactors: {},  // { relative_font_path: scale_factor } 
+  availableFonts: [],   // populated by fetchFontList() 
   loadedFonts: new Set(), // fonts fetched and registered via FontFace API
 };
 

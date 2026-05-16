@@ -8,7 +8,7 @@ import tempfile
 import soundfile as sf
 from werkzeug.utils import secure_filename
 import dataclasses
-from .config import FONTS_DIR, FIRST_FONT, PLAY_RES_X, PLAY_RES_Y, check_device, set_video_duration, get_available_fonts, get_video_dimensions, get_char_width_ratio, set_video_dimensions
+from .config import FONTS_DIR, FIRST_FONT, PLAY_RES_X, PLAY_RES_Y, FONTS_AND_SCALE_FACTORS, check_device, set_video_duration, get_available_fonts, get_video_dimensions, get_char_width_ratio, set_video_dimensions
 from .services.TextBurner import TextBurner, TextSegment, TextStyle, WrapValues
 from .services.VocalRemovalModelHandler import vocalRemovalModelHandler
 from .validators import validate_style
@@ -183,18 +183,16 @@ def render_video():
     return jsonify({'download_url': f'/api/download/{output_filename}'})
 
 
-@app.route('/api/wrap-config', methods=['GET'])
-def get_wrap_config():
+@app.route('/api/libass-config', methods=['GET'])
+def get_libass_config():
     """Return the constants needed to replicate TextBurner.wrap_text on the frontend."""
-    style = TextStyle()
     video_w, video_h = get_video_dimensions()
     return jsonify({
-        'font_size':        style.font_size,
-        'char_width_ratio': get_char_width_ratio(),
-        'play_res_x':       PLAY_RES_X,
-        'play_res_y':       PLAY_RES_Y,
-        'videoW':          video_w,
-        'videoH':          video_h,
+        'play_res_x':               PLAY_RES_X,
+        'play_res_y':               PLAY_RES_Y,
+        'videoW':                   video_w,
+        'videoH':                   video_h,
+        'fonts_and_scale_factors': FONTS_AND_SCALE_FACTORS,
     })
 
 

@@ -41,9 +41,14 @@ function loadVideo(file) {
       state.uploadedVideoFilename = filename;
       showPopUp('Video uploaded to server');
       // Fetch accurate play_res and video dimensions now that the backend has probed the file
-      return fetch('/api/wrap-config')
+      return fetch('/api/libass-config')
         .then(response => response.ok ? response.json() : null)
-        .then(config => { if (config) state.wrapConfig = config; });
+        .then(config => {
+          if (!config) return;
+          const { fonts_and_scale_factors, ...libassFields } = config;
+          state.libassConfig = libassFields;
+          if (fonts_and_scale_factors) state.fontScaleFactors = fonts_and_scale_factors;
+        });
     })
     .then(result => {
       if (result === null) return;
