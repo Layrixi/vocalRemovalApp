@@ -28,8 +28,9 @@ async function applyStyleToOverlay(style) {
   }
 
   //scale appropriate style values (matches backend scaling logic)
-  const scaleCss = (video.clientHeight || 360) / (state.wrapConfig.play_res_y);
-  elem.style.fontSize = (style.font_size * scaleCss) + 'px';
+  const scaleCss = (video.clientHeight || 360) / (state.libassConfig.play_res_y);
+  const fontScaleFactor = state.fontScaleFactors[fontFile] || 0.8;
+  elem.style.fontSize = (style.font_size * scaleCss * fontScaleFactor) + 'px';
   elem.style.webkitTextStroke = style.outline_width > 0
     ? `${style.outline_width * scaleCss}px ${style.outline_color}` : '0';
   elem.style.paintOrder = 'stroke fill';
